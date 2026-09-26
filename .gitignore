@@ -17,3 +17,8 @@ npm-debug.log*
 *.iml
 .vscode/
 .DS_Store
+
+# Telemetria local do motor de specs: contadores por achado de auditoria.
+# A prova por critério (specs/verification/<feature>.json) e as lições
+# (specs/licoes.json) continuam versionadas.
+specs/verification/sinais.json
