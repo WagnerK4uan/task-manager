@@ -5,14 +5,18 @@ consultar por id, atualizar, alterar status e excluir. Monorepo com dois
 artefatos independentes — API em Java 21 com Spring Boot e interface em
 Angular — que se comunicam apenas por HTTP.
 
-> **Estado atual:** três features implementadas e auditadas — a fundação
+> **Estado atual:** quatro features implementadas e auditadas — a fundação
 > ([`001-project-setup`](specs/features/001-project-setup/spec.md)), o domínio
 > da tarefa com a porta de persistência
-> ([`002-task-domain`](specs/features/002-task-domain/spec.md)) e as duas
-> primeiras rotas ([`003-create-task`](specs/features/003-create-task/spec.md)):
-> `POST /api/tasks` cria e `GET /api/tasks/{id}` consulta. Listagem com
-> filtros, atualização, troca de situação e exclusão chegam nas features
-> seguintes — essas rotas ainda respondem 404.
+> ([`002-task-domain`](specs/features/002-task-domain/spec.md)), as duas
+> primeiras rotas ([`003-create-task`](specs/features/003-create-task/spec.md))
+> e a listagem com filtros
+> ([`004-list-tasks`](specs/features/004-list-tasks/spec.md)):
+> `POST /api/tasks` cria, `GET /api/tasks` lista filtrando por título e
+> situação, e `GET /api/tasks/{id}` consulta. Atualização, troca de situação e
+> exclusão chegam nas features seguintes — hoje respondem 405 com o header
+> `Allow` onde o endereço existe e o método não, e 404 `RESOURCE_NOT_FOUND`
+> onde nem o endereço existe.
 
 ## Tecnologias
 
@@ -130,7 +134,7 @@ use o compose.
 |---|---|---|---|
 | POST | `/api/tasks` | 201 + header `Location` | implementada |
 | GET | `/api/tasks/{id}` | 200 | implementada |
-| GET | `/api/tasks?title=&status=` | 200 | próxima feature |
+| GET | `/api/tasks?title=&status=` | 200 | implementada |
 | PUT | `/api/tasks/{id}` | 200 | próxima feature |
 | PATCH | `/api/tasks/{id}/status` | 200 | próxima feature |
 | DELETE | `/api/tasks/{id}` | 204 | próxima feature |
@@ -156,11 +160,23 @@ Consultar a tarefa criada, pelo endereço que o `Location` devolveu:
 curl -i http://localhost:8080/api/tasks/1
 ```
 
-Filtrar a listagem e trocar a situação a partir dela — rotas das features
-seguintes, ainda não implementadas:
+Listar, da tarefa mais recente para a mais antiga. Os dois filtros são
+opcionais: `title` é trecho do título sem distinção de maiúsculas e `status` é
+igualdade exata. Filtro em branco não restringe, e filtro que não casa nada é
+uma lista vazia — não um erro:
 
 ```bash
+curl 'http://localhost:8080/api/tasks'
+curl 'http://localhost:8080/api/tasks?title=spec'
 curl 'http://localhost:8080/api/tasks?title=spec&status=PENDENTE'
+```
+
+Situação fora de `PENDENTE`, `EM_ANDAMENTO` e `CONCLUIDA` é recusada com 400.
+
+Trocar a situação a partir da listagem — rota da feature seguinte, ainda não
+implementada:
+
+```bash
 curl -X PATCH http://localhost:8080/api/tasks/1/status \
   -H 'Content-Type: application/json' \
   -d '{"status": "CONCLUIDA"}'
@@ -179,7 +195,9 @@ Todo erro tem a mesma forma:
 ```
 
 Erros de validação acrescentam `fields`, com um par `field`/`message` por
-campo rejeitado.
+campo rejeitado. Erro de protocolo tem a mesma forma: endereço que a API não
+publica é 404 `RESOURCE_NOT_FOUND`, método não suportado é 405
+`METHOD_NOT_ALLOWED` com o header `Allow` — nunca 500.
 
 ## Testes
 
