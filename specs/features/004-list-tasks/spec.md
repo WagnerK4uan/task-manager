@@ -1,13 +1,8 @@
 # Spec: 004 — Listagem com filtros de título e situação
 
 > feature: 004-list-tasks
-> status: rascunho
+> status: auditada
 
-<!--
-  US-xxx = história de usuário · AC-xxx = critério de aceite
-  ASM-xxx = suposição · Q-xxx = pergunta em aberto
-  Todo critério de aceite vira um teste cujo título carrega @spec:AC-xxx.
--->
 
 ## Objetivo
 

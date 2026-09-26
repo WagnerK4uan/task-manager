@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "proximoId": 3,
+  "proximoId": 4,
   "licoes": [
     {
       "id": "L-001",
@@ -31,10 +31,11 @@
       "chave": "VERIFY_OBSOLETO::feature nova invalida a prova de todas as anteriores porque o motor compara a data da prova com a do codigo mais recente rode o verify de cada feature ja auditada antes do audit ci nao so o da feature em curso",
       "sinal": "VERIFY_OBSOLETO",
       "escopo": "backend",
-      "status": "candidata",
-      "recorrencia": 1,
+      "status": "confirmada",
+      "recorrencia": 2,
       "features": [
-        "001-project-setup"
+        "001-project-setup",
+        "004-list-tasks"
       ],
       "evidencias": [
         {
@@ -42,11 +43,40 @@
           "feature": "001-project-setup",
           "quando": "2026-09-26T17:33:55.078Z",
           "gitRev": "e6ce8bf"
+        },
+        {
+          "fonte": "—",
+          "feature": "004-list-tasks",
+          "quando": "2026-09-26T20:18:13.115Z",
+          "gitRev": "c102b07"
         }
       ],
       "penalidades": 0,
       "criadaEm": "2026-09-26T17:33:55.078Z",
-      "ultimaVez": "2026-09-26T17:33:55.078Z"
+      "ultimaVez": "2026-09-26T20:18:13.115Z"
+    },
+    {
+      "id": "L-003",
+      "texto": "A obsolescência da prova é medida por mtime, não por conteúdo: salvar um arquivo de teste sem alterá-lo já derruba o verify — deixe o verify como último passo, depois dos commits e dos saves, imediatamente antes do audit --ci.",
+      "chave": "VERIFY_OBSOLETO::a obsolescencia da prova e medida por mtime nao por conteudo salvar um arquivo de teste sem altera lo ja derruba o verify deixe o verify como ultimo passo depois dos commits e dos saves imediatamente antes do audit ci",
+      "sinal": "VERIFY_OBSOLETO",
+      "escopo": "backend",
+      "status": "candidata",
+      "recorrencia": 1,
+      "features": [
+        "004-list-tasks"
+      ],
+      "evidencias": [
+        {
+          "fonte": "—",
+          "feature": "004-list-tasks",
+          "quando": "2026-09-26T20:18:13.156Z",
+          "gitRev": "c102b07"
+        }
+      ],
+      "penalidades": 0,
+      "criadaEm": "2026-09-26T20:18:13.156Z",
+      "ultimaVez": "2026-09-26T20:18:13.156Z"
     }
   ]
 }

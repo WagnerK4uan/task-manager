@@ -7,7 +7,10 @@
 
 Corroboradas em múltiplas features. Aplique como guia.
 
-_nenhuma_
+### L-002 — Feature nova invalida a prova de todas as anteriores, porque o motor compara a data da prova com a do código mais recente: rode o verify de cada feature já auditada antes do audit --ci, não só o da feature em curso.
+- sinal: `VERIFY_OBSOLETO` · recorrência: 2 feature(s) · escopo: `backend` · penalidades: 0
+- features: 001-project-setup, 004-list-tasks
+- última evidência: — (004-list-tasks, 2026-09-26T20:18:13.115Z)
 
 ## Candidatas — em observação, NÃO aplicar ainda
 
@@ -18,10 +21,10 @@ Vistas em uma feature só. Registradas, não confiadas.
 - features: 002-task-domain
 - última evidência: AC-008 (002-task-domain, 2026-09-26T16:49:58.086Z)
 
-### L-002 — Feature nova invalida a prova de todas as anteriores, porque o motor compara a data da prova com a do código mais recente: rode o verify de cada feature já auditada antes do audit --ci, não só o da feature em curso.
+### L-003 — A obsolescência da prova é medida por mtime, não por conteúdo: salvar um arquivo de teste sem alterá-lo já derruba o verify — deixe o verify como último passo, depois dos commits e dos saves, imediatamente antes do audit --ci.
 - sinal: `VERIFY_OBSOLETO` · recorrência: 1 feature(s) · escopo: `backend` · penalidades: 0
-- features: 001-project-setup
-- última evidência: — (001-project-setup, 2026-09-26T17:33:55.078Z)
+- features: 004-list-tasks
+- última evidência: — (004-list-tasks, 2026-09-26T20:18:13.156Z)
 
 ## Quarentena — aplicadas e falharam, ignorar
 
