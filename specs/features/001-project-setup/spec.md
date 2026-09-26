@@ -1,7 +1,7 @@
 # Spec: 001 — Configuração inicial do projeto
 
 > feature: 001-project-setup
-> status: pronta
+> status: auditada
 
 <!--
   US-xxx = história de usuário · AC-xxx = critério de aceite
