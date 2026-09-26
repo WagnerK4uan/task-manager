@@ -18,13 +18,18 @@ A regra que governa todas as decisões abaixo:
 
 | Camada | Tecnologia |
 |---|---|
-| Backend | Java 21, Spring Boot 3.5, Spring Data JPA, Hibernate, Bean Validation |
+| Backend | Java 21, Spring Boot 4.1, Spring Data JPA, Hibernate, Bean Validation |
 | Banco | PostgreSQL 16, migrations com Flyway |
 | Documentação da API | springdoc-openapi (Swagger UI) |
 | Frontend | Angular (standalone components), TypeScript, Reactive Forms |
 | Build | Maven Wrapper (backend), npm (frontend) |
 | Execução | Docker e Docker Compose |
-| Testes | JUnit 5, Mockito, MockMvc, Testcontainers |
+| Testes | JUnit 5, Mockito, MockMvc, Testcontainers, ArchUnit |
+
+O Spring Boot 4 renomeou starters: use `spring-boot-starter-webmvc` (não
+`-web`) e `spring-boot-starter-flyway`. O antigo `spring-boot-starter-test` foi
+quebrado em fatias por tecnologia (`-webmvc-test`, `-data-jpa-test`,
+`-flyway-test`, `-actuator-test`).
 
 ## Arquitetura
 
@@ -42,6 +47,12 @@ presentation  ──▶  application  ──▶  domain  ◀──  infrastructu
 - `infrastructure` depende de `domain` porque **implementa** as portas dele.
 - `presentation` conhece `application`; nunca toca em repositório nem em
   entidade.
+- A entidade JPA vive em `domain` e carrega as anotações de mapeamento. É Clean
+  Architecture pragmática: separar modelo de domínio e modelo de persistência
+  exigiria um terceiro conjunto de classes e mappers para oito campos.
+- **Essas regras são teste, não convenção.**
+  `backend/src/test/java/com/taskmanager/architecture/LayerDependencyTest.java`
+  as declara com ArchUnit e quebra o build quando alguém as viola.
 
 **Porta e adaptador na persistência.** `domain/repository/TaskRepository` é uma
 interface própria, com apenas os métodos que o service usa.
@@ -65,7 +76,7 @@ memória, sem framework de mock.
 │   ├── features/<nnn>-<nome>/{spec.md,tasks.md}
 │   └── verification/<feature>.json
 ├── backend/
-│   └── src/main/java/com/example/taskmanager/
+│   └── src/main/java/com/taskmanager/
 │       ├── domain/{entity,enums,exception,repository}
 │       ├── application/{dto,mapper,service}
 │       ├── infrastructure/{persistence,configuration}
@@ -219,6 +230,8 @@ no código, nunca enfraquecendo o princípio.
   serialização.
 - **Persistência e inicialização:** Testcontainers com Postgres real, para que
   as migrations Flyway sejam exercitadas exatamente como em produção.
+- **Camadas:** ArchUnit. A regra de dependência entre camadas é um teste que
+  falha o build, não um acordo verbal.
 - Cada critério de aceite tem pelo menos um teste, anotado assim:
 
 ```java
@@ -257,9 +270,14 @@ node $ONP verify 001-project-setup    # roda os testes e grava a prova por crit�
 node $ONP scaffold 001-project-setup  # gera o esqueleto de teste que falha
 node $ONP assumptions                 # o que o projeto está assumindo
 
-# backend
-cd backend && ./mvnw test             # testes (exige Docker para Testcontainers)
+# backend — com JDK 21 na máquina
+cd backend && ./mvnw test             # testes (exigem Docker para os Testcontainers)
 cd backend && ./mvnw spring-boot:run  # aplicação local
+
+# backend — sem JDK na máquina, build no container (mesmo caminho do Dockerfile)
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$PWD/backend":/app:Z -v "$HOME/.m2":/tmp/.m2:Z -w /app \
+  maven:3.9-eclipse-temurin-21 mvn -Dmaven.repo.local=/tmp/.m2/repository test
 
 # frontend
 cd frontend && npm start
@@ -281,3 +299,6 @@ docker compose up --build
 | D-7 | Sem Lombok, sem MapStruct | `record` resolve o boilerplate onde ele dói; o resto não justifica um processador de anotações |
 | D-8 | Sem paginação na listagem | não é requisito; entra quando houver volume que justifique |
 | D-9 | Testcontainers em vez de H2 | as migrations são específicas de Postgres; testar contra H2 provaria um schema que não é o de produção |
+| D-10 | Regras de camada com ArchUnit | "seguimos Clean Architecture" só é verdade se algo verificar; o teste transforma a regra em gate e custa uma dependência de teste |
+| D-11 | Spring Boot 4.1 | a linha 3.x saiu de suporte e não é mais oferecida pelo Initializr; fixar versão sem correções é dívida nascendo pronta |
+| D-12 | Pacote base `com.taskmanager` | o pacote nomeia o domínio, não a camada onde o código roda |

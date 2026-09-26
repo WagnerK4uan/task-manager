@@ -5,73 +5,73 @@
       "codigo": "ARQUIVO_INEXISTENTE",
       "feature": "001-project-setup",
       "ref": "T-001",
-      "ocorrencias": 15,
+      "ocorrencias": 19,
       "primeiraVez": "2026-09-26T01:07:10.819Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.988Z",
+      "gitRev": "86b07aa"
     },
     "ARQUIVO_INEXISTENTE::001-project-setup::T-002": {
       "codigo": "ARQUIVO_INEXISTENTE",
       "feature": "001-project-setup",
       "ref": "T-002",
-      "ocorrencias": 6,
+      "ocorrencias": 14,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.988Z",
+      "gitRev": "86b07aa"
     },
     "ARQUIVO_INEXISTENTE::001-project-setup::T-003": {
       "codigo": "ARQUIVO_INEXISTENTE",
       "feature": "001-project-setup",
       "ref": "T-003",
-      "ocorrencias": 3,
+      "ocorrencias": 7,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.988Z",
+      "gitRev": "86b07aa"
     },
     "ARQUIVO_INEXISTENTE::001-project-setup::T-004": {
       "codigo": "ARQUIVO_INEXISTENTE",
       "feature": "001-project-setup",
       "ref": "T-004",
-      "ocorrencias": 3,
+      "ocorrencias": 7,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.988Z",
+      "gitRev": "86b07aa"
     },
     "ARQUIVO_INEXISTENTE::001-project-setup::T-005": {
       "codigo": "ARQUIVO_INEXISTENTE",
       "feature": "001-project-setup",
       "ref": "T-005",
-      "ocorrencias": 9,
+      "ocorrencias": 21,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.988Z",
+      "gitRev": "86b07aa"
     },
     "ARQUIVO_INEXISTENTE::001-project-setup::T-006": {
       "codigo": "ARQUIVO_INEXISTENTE",
       "feature": "001-project-setup",
       "ref": "T-006",
-      "ocorrencias": 6,
+      "ocorrencias": 14,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.988Z",
+      "gitRev": "86b07aa"
     },
     "ARQUIVO_INEXISTENTE::001-project-setup::T-007": {
       "codigo": "ARQUIVO_INEXISTENTE",
       "feature": "001-project-setup",
       "ref": "T-007",
-      "ocorrencias": 6,
+      "ocorrencias": 14,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.988Z",
+      "gitRev": "86b07aa"
     },
     "ARQUIVO_INEXISTENTE::001-project-setup::T-008": {
       "codigo": "ARQUIVO_INEXISTENTE",
       "feature": "001-project-setup",
       "ref": "T-008",
-      "ocorrencias": 42,
+      "ocorrencias": 98,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
     },
     "ARQUIVO_INEXISTENTE::001-project-setup::T-009": {
       "codigo": "ARQUIVO_INEXISTENTE",
@@ -86,37 +86,91 @@
       "codigo": "AC_SEM_TESTE",
       "feature": "001-project-setup",
       "ref": "AC-001",
-      "ocorrencias": 3,
+      "ocorrencias": 7,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
     },
     "AC_SEM_TESTE::001-project-setup::AC-002": {
       "codigo": "AC_SEM_TESTE",
       "feature": "001-project-setup",
       "ref": "AC-002",
-      "ocorrencias": 3,
+      "ocorrencias": 7,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
     },
     "AC_SEM_TESTE::001-project-setup::AC-003": {
       "codigo": "AC_SEM_TESTE",
       "feature": "001-project-setup",
       "ref": "AC-003",
-      "ocorrencias": 3,
+      "ocorrencias": 7,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
     },
     "AC_SEM_TESTE::001-project-setup::AC-004": {
       "codigo": "AC_SEM_TESTE",
       "feature": "001-project-setup",
       "ref": "AC-004",
-      "ocorrencias": 3,
+      "ocorrencias": 7,
       "primeiraVez": "2026-09-26T01:07:10.826Z",
-      "ultimaVez": "2026-09-26T01:09:14.291Z",
-      "gitRev": "65197c4"
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-010": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-010",
+      "ocorrencias": 4,
+      "primeiraVez": "2026-09-26T02:18:37.435Z",
+      "ultimaVez": "2026-09-26T02:19:22.988Z",
+      "gitRev": "86b07aa"
+    },
+    "AC_SEM_TESTE::001-project-setup::AC-005": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "001-project-setup",
+      "ref": "AC-005",
+      "ocorrencias": 4,
+      "primeiraVez": "2026-09-26T02:18:37.436Z",
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
+    },
+    "AC_SEM_TESTE::001-project-setup::AC-006": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "001-project-setup",
+      "ref": "AC-006",
+      "ocorrencias": 4,
+      "primeiraVez": "2026-09-26T02:18:37.436Z",
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
+    },
+    "AC_SEM_TESTE::001-project-setup::AC-007": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "001-project-setup",
+      "ref": "AC-007",
+      "ocorrencias": 4,
+      "primeiraVez": "2026-09-26T02:18:37.436Z",
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
+    },
+    "ARQUIVO_ORFAO::—::backend/src/main/java/com/backend/backend/BackendApplication.java": {
+      "codigo": "ARQUIVO_ORFAO",
+      "feature": "—",
+      "ref": "backend/src/main/java/com/backend/backend/BackendApplication.java",
+      "ocorrencias": 4,
+      "primeiraVez": "2026-09-26T02:18:37.436Z",
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
+    },
+    "ARQUIVO_ORFAO::—::backend/src/main/resources/application.properties": {
+      "codigo": "ARQUIVO_ORFAO",
+      "feature": "—",
+      "ref": "backend/src/main/resources/application.properties",
+      "ocorrencias": 4,
+      "primeiraVez": "2026-09-26T02:18:37.436Z",
+      "ultimaVez": "2026-09-26T02:19:22.989Z",
+      "gitRev": "86b07aa"
     }
   }
 }
