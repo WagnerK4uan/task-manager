@@ -1,22 +1,5 @@
-# Constituição — v2.1.0
+# Constituição — v2.2.0
 
-<!--
-  Princípios inegociáveis do projeto. Não são estilo: são restrições.
-  P-xxx = princípio (código de rastreio, como US/AC/T).
-  Níveis: [DEVE] obrigatório · [RECOMENDADO] forte · [PODE] permitido/explícito.
-  Todo [DEVE] precisa de verificação executável — senão o audit acusa
-  "princípio sem verificação" (PRINCIPIO_SEM_VERIFICACAO). Formatos:
-    - verificação(gate): satisfeita pelo próprio audit (só p/ princípios "meta")
-    - verificação(teste): @principle:P-xxx
-    - verificação(proibido): `regex` em `glob`
-    - verificação(obrigatório): `regex` em `glob`
-
-  REGRA DE ENTRADA: um princípio só sai da fila quando a verificação dele
-  consegue rodar. Glob que não casa nenhum arquivo é verificação inerte — o
-  audit acusa (GLOB_SEM_ARQUIVOS) e o princípio vira decoração. Por isso cada
-  princípio é ativado na mesma tarefa que cria o código que ele guarda; a fila
-  está no fim do arquivo, com a feature de entrada de cada um.
--->
 
 ## P-001 [DEVE] Todo requisito tem prova executável
 
@@ -52,6 +35,28 @@ e sem valores.
 
 ---
 
+## P-004 [DEVE] Controller não fala com repositório
+
+Toda operação passa pelo service. O controller recebe a requisição, entrega o
+DTO e devolve a resposta; buscar, gravar e excluir são decisões da camada de
+aplicação. Um controller que injeta repositório empurra regra de negócio para a
+borda e deixa o service sem motivo para existir.
+
+- verificação(proibido): `Repository` em `backend/src/main/java/**/presentation/**`
+
+---
+
+## P-005 [DEVE] Entidade JPA não é payload da API
+
+A apresentação só conhece DTOs. Expor a entidade acopla o contrato público ao
+mapeamento do banco — renomear uma coluna viraria quebra para quem consome. O
+caminho inverso é pior: aceitar a entidade na entrada deixaria o chamador
+escolher `id`, `createdAt` e `updatedAt`, que são do servidor.
+
+- verificação(proibido): `domain\.entity` em `backend/src/main/java/**/presentation/**`
+
+---
+
 ## Fila de princípios
 
 Ainda não estão ativos porque o código que eles guardam não existe. Cada um
@@ -60,6 +65,4 @@ cria os arquivos do glob.
 
 | Princípio | Verificação | Entra em |
 |---|---|---|
-| P-004 [DEVE] Controller não fala com repositório — toda operação passa pelo service | proibido `Repository` em `backend/src/main/java/**/presentation/**` | 003-create-task |
-| P-005 [DEVE] Entidade JPA não é payload da API — a apresentação só conhece DTOs | proibido `domain\.entity` em `backend/src/main/java/**/presentation/**` | 003-create-task |
 | P-006 [DEVE] Componente Angular não faz chamada HTTP — HttpClient vive em core/services | proibido `HttpClient` em `frontend/src/app/features/**` | 008-frontend-tasks |
