@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "sinais": {
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-001": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-001",
+      "ocorrencias": 15,
+      "primeiraVez": "2026-09-26T01:07:10.819Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-002": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-002",
+      "ocorrencias": 6,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-003": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-003",
+      "ocorrencias": 3,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-004": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-004",
+      "ocorrencias": 3,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-005": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-005",
+      "ocorrencias": 9,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-006": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-006",
+      "ocorrencias": 6,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-007": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-007",
+      "ocorrencias": 6,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-008": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-008",
+      "ocorrencias": 42,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "ARQUIVO_INEXISTENTE::001-project-setup::T-009": {
+      "codigo": "ARQUIVO_INEXISTENTE",
+      "feature": "001-project-setup",
+      "ref": "T-009",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:07:10.826Z",
+      "gitRev": "297dda5"
+    },
+    "AC_SEM_TESTE::001-project-setup::AC-001": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "001-project-setup",
+      "ref": "AC-001",
+      "ocorrencias": 3,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "AC_SEM_TESTE::001-project-setup::AC-002": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "001-project-setup",
+      "ref": "AC-002",
+      "ocorrencias": 3,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "AC_SEM_TESTE::001-project-setup::AC-003": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "001-project-setup",
+      "ref": "AC-003",
+      "ocorrencias": 3,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    },
+    "AC_SEM_TESTE::001-project-setup::AC-004": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "001-project-setup",
+      "ref": "AC-004",
+      "ocorrencias": 3,
+      "primeiraVez": "2026-09-26T01:07:10.826Z",
+      "ultimaVez": "2026-09-26T01:09:14.291Z",
+      "gitRev": "65197c4"
+    }
+  }
+}
