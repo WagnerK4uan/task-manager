@@ -83,10 +83,11 @@ preciso sem varrer a lista inteira.
 - **Então** a resposta é 400 com `error` igual a `MALFORMED_REQUEST`, no mesmo
   contrato de erro das demais rotas
 
-### US-009 — Endereço errado não parece falha do servidor
+### US-009 — Erro de protocolo não parece falha do servidor
 
-Como pessoa que integra com a API, quero que um endereço inexistente responda
-404, para que eu saiba que errei a rota em vez de suspeitar que o serviço caiu.
+Como pessoa que integra com a API, quero que endereço inexistente e método não
+suportado respondam com o status correto de protocolo, para que eu saiba que
+errei a requisição em vez de suspeitar que o serviço caiu.
 
 #### AC-025 — Rota inexistente responde 404 no contrato único de erro
 
@@ -95,6 +96,15 @@ Como pessoa que integra com a API, quero que um endereço inexistente responda
 - **Então** a resposta é 404 com `error` igual a `RESOURCE_NOT_FOUND`, `status`
   `404`, `timestamp` em UTC e `path` igual ao endereço pedido — nunca 500, e
   nunca a página de erro padrão do servidor
+
+#### AC-026 — Método não suportado responde 405, e diz o que a rota aceita
+
+- **Dado** uma rota que existe mas não aceita o método pedido (`DELETE
+  /api/tasks`, enquanto a exclusão não existe)
+- **Quando** ela é requisitada contra a aplicação de pé
+- **Então** a resposta é 405 com `error` igual a `METHOD_NOT_ALLOWED`, no mesmo
+  contrato de erro, e o header `Allow` lista os métodos que a rota aceita —
+  nunca 500
 
 ## Requisitos não funcionais
 
@@ -133,7 +143,7 @@ Parâmetros de consulta, os dois opcionais:
 |---|---|---|
 | `status` fora do enum na consulta | 400 | `MALFORMED_REQUEST` (já mapeado na 003) |
 | Rota inexistente | 404 | `RESOURCE_NOT_FOUND` (novo nesta feature) |
-| Método não suportado na rota existente | a decidir | Q-006 |
+| Método não suportado na rota existente | 405 | `METHOD_NOT_ALLOWED` (novo nesta feature) |
 | Filtro que não casa nada | 200 | nenhum erro: lista vazia |
 | Qualquer outra | 500 | `INTERNAL_ERROR`, sem vazar stack trace |
 
@@ -147,8 +157,8 @@ handler que existe.
 |---|---|---|
 | `TaskService` | T-019 da 003 | ganha `listar(titulo, status)`, com a normalização do título em branco |
 | `TaskController` | T-020 da 003 | ganha `@GetMapping` na raiz, com os dois `@RequestParam` opcionais |
-| `GlobalExceptionHandler` | T-021 da 003 | ganha `NoResourceFoundException` para 404 `RESOURCE_NOT_FOUND` |
-| `CLAUDE.md` | — | a tabela de erros ganha a linha de `NoResourceFoundException` |
+| `GlobalExceptionHandler` | T-021 da 003 | ganha `NoResourceFoundException` para 404 `RESOURCE_NOT_FOUND` e `HttpRequestMethodNotSupportedException` para 405 `METHOD_NOT_ALLOWED` |
+| `CLAUDE.md` | — | a tabela de erros ganha as duas linhas novas de protocolo |
 | `README.md` | — | a listagem sai de "próxima feature" para implementada |
 
 Decisões:
@@ -160,6 +170,9 @@ Decisões:
   `TASK_NOT_FOUND`: um diz que o endereço não existe, o outro que a tarefa não
   existe. Colapsar os dois faria o cliente confundir rota errada com tarefa
   apagada.
+- **O 405 carrega o header `Allow`**, montado a partir dos métodos que a
+  exceção do Spring já informa. Devolver 405 sem dizer o que a rota aceita
+  obriga quem integra a adivinhar — e o dado está na mão de quem trata o erro.
 - **As três classes de teste da 003 são estendidas**, em vez de nascerem
   paralelas: o `TaskControllerTest` já tem o service substituído e o
   `TaskApiIntegrationTest` já sobe a aplicação inteira. Criar
@@ -188,11 +201,11 @@ Decisões:
 
 | ID | Suposição | Status | Resolução |
 |---|---|---|---|
-| ASM-016 | A listagem devolve um array puro (`[{...}]`), sem envelope nem contagem total. Se a paginação entrar depois (D-8), o corpo muda de forma e isso é quebra de contrato para quem consome — assumida agora em troca de não carregar envelope que ninguém usa. | aberta | — |
-| ASM-017 | A normalização de "título em branco é o mesmo que título ausente" fica no service, não no controller. A borda HTTP entrega o que recebeu; decidir o que um filtro vazio significa é regra de aplicação. | aberta | — |
+| ASM-016 | A listagem devolve um array puro (`[{...}]`), sem envelope nem contagem total. Se a paginação entrar depois (D-8), o corpo muda de forma e isso é quebra de contrato para quem consome — assumida agora em troca de não carregar envelope que ninguém usa. | confirmada | Confirmada em 26/09/2026: array puro; envelope entra só se a paginação virar requisito |
+| ASM-017 | A normalização de "título em branco é o mesmo que título ausente" fica no service, não no controller. A borda HTTP entrega o que recebeu; decidir o que um filtro vazio significa é regra de aplicação. | confirmada | Confirmada em 26/09/2026: normalização no service |
 
 ## Perguntas em aberto
 
 | ID | Pergunta | Status | Resposta |
 |---|---|---|---|
-| Q-006 | Método não suportado numa rota que existe (por exemplo `DELETE /api/tasks` antes da feature de exclusão) cai no mesmo `@ExceptionHandler(Exception.class)` e também vira 500 — é a mesma família de defeito que a AC-025 conserta. Mapear para 405 `METHOD_NOT_ALLOWED` custa outra linha no mesmo arquivo. Recomendação: mapear junto, na T-026, porque deixar metade do defeito consertado é pior que não ter notado. | aberta | — |
+| Q-006 | Método não suportado numa rota que existe (por exemplo `DELETE /api/tasks` antes da feature de exclusão) cai no mesmo `@ExceptionHandler(Exception.class)` e também vira 500 — é a mesma família de defeito que a AC-025 conserta. | respondida | Mapeado junto, na T-026: 405 `METHOD_NOT_ALLOWED` com header `Allow`, provado pela AC-026 |
