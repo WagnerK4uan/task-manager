@@ -1,0 +1,47 @@
+{
+  "feature": "001-project-setup",
+  "timestamp": "2026-09-26T03:25:51.318Z",
+  "gitRev": "151e672",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 1,
+  "testsParsed": 7,
+  "results": {
+    "AC-001": {
+      "status": "pass",
+      "testName": "@spec:AC-001 contexto sobe e a conexão com o PostgreSQL responde",
+      "method": "tap"
+    },
+    "AC-002": {
+      "status": "pass",
+      "testName": "@spec:AC-002 migrations criam a tabela tasks com o contrato de dados da spec",
+      "method": "tap"
+    },
+    "AC-003": {
+      "status": "pass",
+      "testName": "@spec:AC-003 schema vem das migrations e o Hibernate fica em validate",
+      "method": "tap"
+    },
+    "AC-004": {
+      "status": "fail",
+      "testName": "@spec:AC-004 /v3/api-docs publica o documento OpenAPI que identifica a API",
+      "method": "tap"
+    },
+    "AC-005": {
+      "status": "pass",
+      "testName": "@spec:AC-005 domínio não depende de framework nem das outras camadas",
+      "method": "tap"
+    },
+    "AC-006": {
+      "status": "pass",
+      "testName": "@spec:AC-006 apresentação não conhece entidade nem repositório",
+      "method": "tap"
+    },
+    "AC-007": {
+      "status": "pass",
+      "testName": "@spec:AC-007 aplicação não depende de quem a chama nem de quem a serve",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

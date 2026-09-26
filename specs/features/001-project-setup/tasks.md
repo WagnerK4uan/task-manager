@@ -47,8 +47,8 @@
 ## T-005 — Prova executável da fundação [pendente]
 
 - Refs: AC-001, AC-002, AC-003, AC-004
-- Arquivos: scripts/spec-tap.mjs, backend/src/test/java/com/taskmanager/PostgresIntegrationTest.java, backend/src/test/java/com/taskmanager/ProjectSetupTest.java
-- Notas: `spec-tap.mjs` usa o `./mvnw` local quando existe um JDK e cai para o container Maven quando não existe (ASM-004); roda o build, lê os XML do Surefire e imprime TAP com o `@DisplayName` de cada caso — é assim que o motor sabe critério a critério o que passou. `PostgresIntegrationTest` é a classe base com o container PostgreSQL (ASM-001); os quatro critérios de US-001 e US-002 viram testes anotados.
+- Arquivos: scripts/spec-tap.mjs, backend/pom.xml, backend/src/test/java/com/taskmanager/PostgresIntegrationTest.java, backend/src/test/java/com/taskmanager/ProjectSetupTest.java
+- Notas: `spec-tap.mjs` usa o `./mvnw` local quando existe um JDK e cai para o container Maven quando não existe (ASM-004); roda o build, lê os XML do Surefire e imprime TAP com o `@DisplayName` de cada caso — é assim que o motor sabe critério a critério o que passou. `PostgresIntegrationTest` é a classe base com o container PostgreSQL (ASM-001); os quatro critérios de US-001 e US-002 viram testes anotados. O `pom.xml` entrou na lista depois: por padrão o XML do Surefire grava o nome do método, não o `@DisplayName`, então sem `usePhrasedTestCaseMethodName` a tag `@spec:AC-xxx` não chega ao TAP e o gate provaria zero critérios.
 
 ## T-006 — Imagem Docker do backend [pendente]
 
