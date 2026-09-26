@@ -147,6 +147,8 @@ rejeitado. Mapeamentos no `GlobalExceptionHandler`:
 | `MethodArgumentNotValidException` | 400 | `VALIDATION_ERROR` |
 | `HttpMessageNotReadableException` | 400 | `MALFORMED_REQUEST` |
 | `MethodArgumentTypeMismatchException` | 400 | `MALFORMED_REQUEST` |
+| `NoResourceFoundException` | 404 | `RESOURCE_NOT_FOUND` |
+| `HttpRequestMethodNotSupportedException` | 405 | `METHOD_NOT_ALLOWED` (com header `Allow`) |
 | qualquer outra | 500 | `INTERNAL_ERROR` (sem vazar stack trace) |
 
 ### Endpoints

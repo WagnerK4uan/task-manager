@@ -3,13 +3,18 @@ package com.taskmanager.presentation.handler;
 import com.taskmanager.domain.exception.TaskNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -42,6 +47,28 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> requisicaoMalformada(HttpServletRequest requisicao) {
         return resposta(
                 HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "Malformed request", requisicao);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> rotaNaoEncontrada(HttpServletRequest requisicao) {
+        return resposta(
+                HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "Resource not found", requisicao);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> metodoNaoSuportado(
+            HttpRequestMethodNotSupportedException excecao, HttpServletRequest requisicao) {
+        Set<HttpMethod> suportados =
+                Objects.requireNonNullElse(excecao.getSupportedHttpMethods(), Set.of());
+
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .allow(suportados.toArray(HttpMethod[]::new))
+                .body(
+                        ErrorResponse.de(
+                                HttpStatus.METHOD_NOT_ALLOWED.value(),
+                                "METHOD_NOT_ALLOWED",
+                                "Method not allowed",
+                                requisicao.getRequestURI()));
     }
 
     @ExceptionHandler(Exception.class)
