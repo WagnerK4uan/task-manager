@@ -1,7 +1,6 @@
 package com.taskmanager.architecture;
 
 import static com.tngtech.archunit.base.DescribedPredicate.not;
-import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
@@ -16,10 +15,15 @@ import org.junit.jupiter.api.Test;
 
 class LayerDependencyTest {
 
+    /**
+     * As anotações de mapeamento são a única concessão: {@code jakarta.persistence} e
+     * {@code org.hibernate.annotations}, que carrega {@code @CreationTimestamp} e
+     * {@code @UpdateTimestamp}. Qualquer outro pacote de framework está proibido no domínio.
+     */
     private static final DescribedPredicate<JavaClass> FRAMEWORK_FORA_DO_MAPEAMENTO =
-            resideInAnyPackage("org.springframework..", "jakarta..")
-                    .and(not(resideInAPackage("jakarta.persistence..")))
-                    .as("framework além de jakarta.persistence");
+            resideInAnyPackage("org.springframework..", "jakarta..", "org.hibernate..")
+                    .and(not(resideInAnyPackage("jakarta.persistence..", "org.hibernate.annotations..")))
+                    .as("framework além das anotações de mapeamento");
 
     private static JavaClasses classes;
 
