@@ -1,0 +1,14 @@
+target/
+
+# O build acontece na imagem do Maven; o wrapper não é usado aqui.
+.mvn/
+mvnw
+mvnw.cmd
+
+.git
+.gitignore
+.gitattributes
+.idea/
+*.iml
+Dockerfile
+.dockerignore
