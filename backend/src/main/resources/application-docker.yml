@@ -1,0 +1,11 @@
+# Perfil usado pelo container do backend. Sem valor padrão: variável de
+# ambiente ausente derruba a inicialização em vez de apontar para outro banco.
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
