@@ -8,7 +8,6 @@ spring:
     password: ${DB_PASSWORD}
 
   jpa:
-    # O schema vem das migrations; o Hibernate só confere se o mapeamento bate.
     hibernate:
       ddl-auto: validate
     open-in-view: false
