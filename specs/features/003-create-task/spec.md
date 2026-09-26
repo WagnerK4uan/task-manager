@@ -103,6 +103,13 @@ existir.
 - **Então** a resposta é 200 e o `id` do corpo é o mesmo do recurso criado — a
   criação e a consulta concordam sobre onde a tarefa mora
 
+#### AC-020 — Identificador não numérico é erro de quem chama, não do servidor
+
+- **Dado** uma consulta cujo identificador não é um número (`/api/tasks/abc`)
+- **Quando** a consulta é feita
+- **Então** a resposta é 400 com `error` igual a `MALFORMED_REQUEST` — nunca
+  500, porque o servidor não falhou: a requisição é que está malformada
+
 ## Requisitos não funcionais
 
 - **RNF-11** — A apresentação não conhece entidade nem repositório: P-004 e
@@ -153,7 +160,7 @@ Corpo de resposta (`TaskResponse`), igual na criação e na consulta: `id`,
 | Campo obrigatório ausente, tamanho excedido ou prazo no passado | 400 | `VALIDATION_ERROR`, com `fields` |
 | JSON sintaticamente quebrado, ou valor que o enum não tem | 400 | `MALFORMED_REQUEST` |
 | Identificador inexistente na consulta | 404 | `TASK_NOT_FOUND` |
-| Identificador não numérico na rota (`/api/tasks/abc`) | a decidir | Q-005 |
+| Identificador não numérico na rota (`/api/tasks/abc`) | 400 | `MALFORMED_REQUEST` (Q-005, provado pela AC-020) |
 | Qualquer outra | 500 | `INTERNAL_ERROR`, sem vazar stack trace |
 
 ## Impacto técnico
@@ -182,6 +189,10 @@ Decisões:
   `presentation/` (T-020), e saem da fila no fim do arquivo.
 - **O README deixa de dizer que `/api/tasks` responde 404** (T-023): a frase
   vira falsa no instante em que o controller sobe.
+- **A tabela de erros do CLAUDE.md ganha a linha do identificador não
+  numérico** (T-021): `MethodArgumentTypeMismatchException` para 400
+  `MALFORMED_REQUEST`, decidido na Q-005. Sem essa linha, o caso cairia em
+  "qualquer outra" e viraria 500 por culpa do chamador.
 - Nenhuma migration, nenhuma mudança de schema, nenhuma dependência nova.
 
 ## Dependências
@@ -209,12 +220,12 @@ Decisões:
 |---|---|---|---|
 | ASM-012 | Situação e prioridade são obrigatórias na criação, sem valor padrão no DTO: quem cria diz em que estado a tarefa nasce. Omitir qualquer uma das duas dá 400, não uma tarefa `PENDENTE` implícita. | confirmada | Decisão do mantenedor em 26/09/2026 |
 | ASM-013 | A feature carrega as duas rotas — criação e consulta por id — embora o diretório se chame `003-create-task`. O nome fica como está porque a fila da constituição e a spec da 002 já o referenciam; renomear tornaria as duas referências obsoletas por ganho cosmético. | confirmada | Decisão do mantenedor em 26/09/2026 |
-| ASM-014 | O `ErrorResponse` (e o par `field`/`message` dentro dele) vive em `presentation/handler`, junto de quem o produz, e não em `application/dto`: é forma de HTTP, não corpo de uma operação de aplicação. | aberta | — |
-| ASM-015 | As mensagens de validação de cada campo saem em português, como os valores dos enums (ASM-007 da 002). Chaves do JSON e códigos de erro continuam em inglês. | aberta | — |
+| ASM-014 | O `ErrorResponse` (e o par `field`/`message` dentro dele) vive em `presentation/handler`, junto de quem o produz, e não em `application/dto`: é forma de HTTP, não corpo de uma operação de aplicação. | confirmada | Confirmada em 26/09/2026: fica em `presentation/handler`, para que a camada de aplicação siga sem conhecer código de status |
+| ASM-015 | As mensagens de validação de cada campo saem em português, como os valores dos enums (ASM-007 da 002). Chaves do JSON e códigos de erro continuam em inglês. | confirmada | Confirmada em 26/09/2026: mensagens em português, chaves e códigos em inglês |
 
 ## Perguntas em aberto
 
 | ID | Pergunta | Status | Resposta |
 |---|---|---|---|
-| Q-004 | Campo desconhecido no corpo da criação (por exemplo `id` ou `createdAt`) hoje é ignorado em silêncio, que é o padrão do Spring Boot. Recusar com 400 seria mais estrito e avisaria quem está integrando errado. Recomendação: manter ignorando, porque o contrário transforma cada campo novo do frontend em erro de integração. | aberta | — |
-| Q-005 | `GET /api/tasks/abc` não casa o tipo do parâmetro e cai em "qualquer outra" da tabela de erros, virando 500 — que é errado, porque a culpa é do chamador. Recomendação: mapear para 400 `MALFORMED_REQUEST`, o que acrescenta uma linha à tabela de erros do CLAUDE.md. | aberta | — |
+| Q-004 | Campo desconhecido no corpo da criação (por exemplo `id` ou `createdAt`) hoje é ignorado em silêncio, que é o padrão do Spring Boot. Recusar com 400 seria mais estrito e avisaria quem está integrando errado. | respondida | Continua ignorado, como o padrão do Spring Boot: `id`, `createdAt` e `updatedAt` têm uma fonte só, o servidor |
+| Q-005 | `GET /api/tasks/abc` não casa o tipo do parâmetro e cai em "qualquer outra" da tabela de erros, virando 500 — que é errado, porque a culpa é do chamador. | respondida | Vira 400 `MALFORMED_REQUEST`, provado pela AC-020; a tabela de erros do CLAUDE.md ganha a linha correspondente |

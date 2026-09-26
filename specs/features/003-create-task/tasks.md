@@ -42,15 +42,15 @@
 
 ## T-021 — Contrato único de erro no handler [pendente]
 
-- Refs: AC-015, AC-016, AC-018
-- Arquivos: backend/src/main/java/com/taskmanager/presentation/handler/GlobalExceptionHandler.java, backend/src/main/java/com/taskmanager/presentation/handler/ErrorResponse.java
-- Notas: `@RestControllerAdvice` com os quatro mapeamentos da tabela do CLAUDE.md — `TaskNotFoundException` para 404 `TASK_NOT_FOUND`, `MethodArgumentNotValidException` para 400 `VALIDATION_ERROR` com `fields`, `HttpMessageNotReadableException` para 400 `MALFORMED_REQUEST` (é onde cai o valor de enum inexistente) e qualquer outra para 500 `INTERNAL_ERROR` sem vazar stack trace. `ErrorResponse` é um `record` em `presentation/handler` (ASM-014), com o par `field`/`message` aninhado. O `timestamp` é `Instant` em UTC (RNF-15). Se a Q-005 for respondida pelo 400, o mapeamento do identificador não numérico entra aqui também.
+- Refs: AC-015, AC-016, AC-018, AC-020
+- Arquivos: backend/src/main/java/com/taskmanager/presentation/handler/GlobalExceptionHandler.java, backend/src/main/java/com/taskmanager/presentation/handler/ErrorResponse.java, CLAUDE.md
+- Notas: `@RestControllerAdvice` com os quatro mapeamentos da tabela do CLAUDE.md — `TaskNotFoundException` para 404 `TASK_NOT_FOUND`, `MethodArgumentNotValidException` para 400 `VALIDATION_ERROR` com `fields`, `HttpMessageNotReadableException` para 400 `MALFORMED_REQUEST` (é onde cai o valor de enum inexistente) e qualquer outra para 500 `INTERNAL_ERROR` sem vazar stack trace. `ErrorResponse` é um `record` em `presentation/handler` (ASM-014), com o par `field`/`message` aninhado. O `timestamp` é `Instant` em UTC (RNF-15). A Q-005 foi respondida pelo 400: `MethodArgumentTypeMismatchException` também vira `MALFORMED_REQUEST` (AC-020), e a tabela de erros do CLAUDE.md ganha essa linha no mesmo commit — a tabela e o código que a implementa mudam juntos ou a documentação nasce mentindo.
 
 ## T-022 — Prova executável das duas rotas [pendente]
 
-- Refs: AC-014, AC-015, AC-016, AC-017, AC-018, AC-019
+- Refs: AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-020
 - Arquivos: backend/src/test/java/com/taskmanager/application/TaskServiceTest.java, backend/src/test/java/com/taskmanager/presentation/TaskControllerTest.java, backend/src/test/java/com/taskmanager/presentation/TaskApiIntegrationTest.java
-- Notas: três fatias, cada uma no seu nível. `TaskServiceTest` é unitário com um duplo em memória da porta `TaskRepository` — sem contexto Spring, sem framework de mock. `TaskControllerTest` é `@WebMvcTest` com o service substituído por `@MockitoBean` (o `@MockBean` saiu no Spring Boot 4) e cobre AC-014 a AC-018: status, header `Location`, corpo e o contrato de erro campo a campo. `TaskApiIntegrationTest` estende o `PostgresIntegrationTest` e cobre só a AC-019 — cria, segue o `Location` e confere o id, que é a única afirmação que exige as duas rotas e o banco real ao mesmo tempo. Um `@DisplayName` com `@spec:AC-xxx` por critério, senão o gate prova zero.
+- Notas: três fatias, cada uma no seu nível. `TaskServiceTest` é unitário com um duplo em memória da porta `TaskRepository` — sem contexto Spring, sem framework de mock. `TaskControllerTest` é `@WebMvcTest` com o service substituído por `@MockitoBean` (o `@MockBean` saiu no Spring Boot 4) e cobre AC-014 a AC-018 e a AC-020: status, header `Location`, corpo e o contrato de erro campo a campo, incluindo o identificador não numérico. `TaskApiIntegrationTest` estende o `PostgresIntegrationTest` e cobre só a AC-019 — cria, segue o `Location` e confere o id, que é a única afirmação que exige as duas rotas e o banco real ao mesmo tempo. Um `@DisplayName` com `@spec:AC-xxx` por critério, senão o gate prova zero.
 
 ## T-023 — README com as duas rotas publicadas [pendente]
 
