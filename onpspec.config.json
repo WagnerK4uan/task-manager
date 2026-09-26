@@ -1,0 +1,22 @@
+{
+  "specDir": "specs",
+  "testCommand": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "testGlobs": [
+    "backend/src/test/**"
+  ],
+  "srcGlobs": [
+    "backend/src/main/**",
+    "frontend/src/app/**"
+  ],
+  "ignoreGlobs": [
+    ".git/**",
+    ".claude/**",
+    ".agents/**",
+    "specs/**",
+    "**/target/**",
+    "**/node_modules/**",
+    "**/.angular/**",
+    "frontend/dist/**"
+  ]
+}
