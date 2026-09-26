@@ -1,7 +1,7 @@
 # Spec: 002 — Domínio da tarefa e porta de persistência
 
 > feature: 002-task-domain
-> status: rascunho
+> status: auditada
 
 <!--
   US-xxx = história de usuário · AC-xxx = critério de aceite
@@ -184,6 +184,15 @@ hoje, sem ninguém notar. Esta feature fecha o buraco: a regra passa a proibir
 mapeamento pela mesma razão que `jakarta.persistence` é. O resultado é uma
 regra que cobre mais do que cobria; nenhum princípio é afrouxado.
 
+**A base de teste da 001 serve mais de uma classe pela primeira vez.** O
+`PostgresIntegrationTest` era package-private e declarava o container com
+`@Container`: o ciclo de vida do JUnit o parava ao fim de cada classe, e a
+classe seguinte reaproveitava o contexto Spring em cache apontando para uma
+porta que já não existia. Esta feature torna a base pública — as classes de
+teste vivem em subpacotes — e passa a um container único, iniciado uma vez e
+vivo enquanto a JVM de teste viver. É o que a ASM-011 já assumia; a 001 tinha
+uma classe só, então a limitação não tinha como aparecer lá.
+
 Outros impactos:
 
 - A ASM-006 da 001 se cumpre: as regras ArchUnit deixam de rodar sobre pacotes
@@ -218,13 +227,13 @@ Outros impactos:
 |---|---|---|---|
 | ASM-007 | Os valores dos enums ficam em português (`PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`, `BAIXA`, `MEDIA`, `ALTA`), embora os identificadores do código sejam em inglês. O payload fica bilíngue — chaves e códigos de erro em inglês, valores em português —, em troca de casar com a interface em pt-BR e com os exemplos que o README já publica. | confirmada | Decisão do mantenedor em 26/09/2026 |
 | ASM-008 | A exceção de domínio não entra aqui: uma classe que ninguém lança é código morto, e o audit a acusaria como órfã. Ela nasce na 003, junto com o service que a lança e o handler que a traduz. | confirmada | Confirmada: exceção fica para a 003 |
-| ASM-009 | A porta nasce com as quatro operações que o CRUD das features 003 a 007 vai usar, e só com elas. Se uma feature precisar de outra, ela entra naquela feature — não por antecipação. | aberta | — |
-| ASM-010 | A entidade não tem valor padrão de status nem de prioridade. Quem decide o que é uma tarefa recém-criada é o DTO de criação, na 003; a entidade exige os dois porque o banco exige. | aberta | — |
-| ASM-011 | Os testes desta feature reaproveitam o `PostgresIntegrationTest` da 001 — mesmo container, mesmas migrations. Nenhuma fatia de teste nova é introduzida. | aberta | — |
+| ASM-009 | A porta nasce com as quatro operações que o CRUD das features 003 a 007 vai usar, e só com elas. Se uma feature precisar de outra, ela entra naquela feature — não por antecipação. | confirmada | Confirmada: porta com gravar, buscar por id, buscar com filtros e excluir por id |
+| ASM-010 | A entidade não tem valor padrão de status nem de prioridade. Quem decide o que é uma tarefa recém-criada é o DTO de criação, na 003; a entidade exige os dois porque o banco exige. | confirmada | Confirmada: os dois campos são argumentos do construtor de negócio, sem padrão |
+| ASM-011 | Os testes desta feature reaproveitam o `PostgresIntegrationTest` da 001 — mesmo container, mesmas migrations. Nenhuma fatia de teste nova é introduzida. | confirmada | Confirmada: mesma base, nenhuma fatia nova; a base virou pública e de container único (ver "Impacto técnico") |
 
 ## Perguntas em aberto
 
 | ID | Pergunta | Status | Resposta |
 |---|---|---|---|
-| Q-002 | A busca por título é `LIKE` com curinga à esquerda, que um índice B-tree não atende — a migration da 001 já registra isso. A partir de que volume vale um índice trigram (`pg_trgm`)? | aberta | Sem dados de uso; decidir quando houver volume real, não por antecipação |
-| Q-003 | A ordem padrão da busca é `createdAt` decrescente, escolhida aqui para que a listagem não dependa da ordem física das linhas. Se a interface pedir outra (vencimento mais próximo, prioridade), isso vira requisito da 004 ou da 008 — e a porta ganha o parâmetro lá. | aberta | — |
+| Q-002 | A busca por título é `LIKE` com curinga à esquerda, que um índice B-tree não atende — a migration da 001 já registra isso. A partir de que volume vale um índice trigram (`pg_trgm`)? | respondida | Sem índice agora: o `pg_trgm` entra por migration quando houver volume medido que o justifique, não por antecipação |
+| Q-003 | A ordem padrão da busca é `createdAt` decrescente, escolhida aqui para que a listagem não dependa da ordem física das linhas. Se a interface pedir outra (vencimento mais próximo, prioridade), isso vira requisito da 004 ou da 008 — e a porta ganha o parâmetro lá. | respondida | `createdAt` decrescente fixo na JPQL; ordenação configurável vira requisito da 004 ou da 008 |

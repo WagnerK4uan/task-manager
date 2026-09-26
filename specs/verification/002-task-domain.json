@@ -1,0 +1,42 @@
+{
+  "feature": "002-task-domain",
+  "timestamp": "2026-09-26T16:46:47.187Z",
+  "gitRev": "4bf3971",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 13,
+  "results": {
+    "AC-008": {
+      "status": "pass",
+      "testName": "@spec:AC-008 a tarefa gravada volta íntegra do banco",
+      "method": "tap"
+    },
+    "AC-009": {
+      "status": "pass",
+      "testName": "@spec:AC-009 status e prioridade são gravados como texto",
+      "method": "tap"
+    },
+    "AC-010": {
+      "status": "pass",
+      "testName": "@spec:AC-010 as datas de auditoria são preenchidas sozinhas",
+      "method": "tap"
+    },
+    "AC-011": {
+      "status": "pass",
+      "testName": "@spec:AC-011 as quatro operações funcionam através da porta",
+      "method": "tap"
+    },
+    "AC-012": {
+      "status": "pass",
+      "testName": "@spec:AC-012 a busca por título é parcial e indiferente a maiúsculas",
+      "method": "tap"
+    },
+    "AC-013": {
+      "status": "pass",
+      "testName": "@spec:AC-013 buscar um id inexistente é resultado vazio, não erro",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

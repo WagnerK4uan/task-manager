@@ -1,11 +1,11 @@
 {
   "feature": "001-project-setup",
-  "timestamp": "2026-09-26T04:29:06.169Z",
-  "gitRev": "1ebcdb2",
+  "timestamp": "2026-09-26T16:48:38.599Z",
+  "gitRev": "4bf3971",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
-  "testsParsed": 7,
+  "testsParsed": 13,
   "results": {
     "AC-001": {
       "status": "pass",
