@@ -1,0 +1,58 @@
+package com.taskmanager.presentation.handler;
+
+import com.taskmanager.domain.exception.TaskNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<ErrorResponse> tarefaNaoEncontrada(
+            TaskNotFoundException excecao, HttpServletRequest requisicao) {
+        return resposta(HttpStatus.NOT_FOUND, "TASK_NOT_FOUND", excecao.getMessage(), requisicao);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> validacaoRecusada(
+            MethodArgumentNotValidException excecao, HttpServletRequest requisicao) {
+        List<ErrorResponse.FieldError> campos =
+                excecao.getFieldErrors().stream()
+                        .map(
+                                erro ->
+                                        new ErrorResponse.FieldError(
+                                                erro.getField(), erro.getDefaultMessage()))
+                        .toList();
+
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.deValidacao(requisicao.getRequestURI(), campos));
+    }
+
+    @ExceptionHandler({
+        HttpMessageNotReadableException.class,
+        MethodArgumentTypeMismatchException.class
+    })
+    public ResponseEntity<ErrorResponse> requisicaoMalformada(HttpServletRequest requisicao) {
+        return resposta(
+                HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "Malformed request", requisicao);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> erroInterno(HttpServletRequest requisicao) {
+        return resposta(
+                HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Internal error", requisicao);
+    }
+
+    private static ResponseEntity<ErrorResponse> resposta(
+            HttpStatus status, String erro, String mensagem, HttpServletRequest requisicao) {
+        return ResponseEntity.status(status)
+                .body(ErrorResponse.de(status.value(), erro, mensagem, requisicao.getRequestURI()));
+    }
+}

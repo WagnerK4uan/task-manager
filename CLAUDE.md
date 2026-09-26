@@ -146,6 +146,7 @@ rejeitado. Mapeamentos no `GlobalExceptionHandler`:
 | `TaskNotFoundException` | 404 | `TASK_NOT_FOUND` |
 | `MethodArgumentNotValidException` | 400 | `VALIDATION_ERROR` |
 | `HttpMessageNotReadableException` | 400 | `MALFORMED_REQUEST` |
+| `MethodArgumentTypeMismatchException` | 400 | `MALFORMED_REQUEST` |
 | qualquer outra | 500 | `INTERNAL_ERROR` (sem vazar stack trace) |
 
 ### Endpoints
