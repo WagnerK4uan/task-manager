@@ -1,10 +1,10 @@
 {
   "feature": "001-project-setup",
-  "timestamp": "2026-09-26T03:25:51.318Z",
-  "gitRev": "151e672",
+  "timestamp": "2026-09-26T03:38:00.500Z",
+  "gitRev": "33a1156",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
-  "exitCode": 1,
+  "exitCode": 0,
   "testsParsed": 7,
   "results": {
     "AC-001": {
@@ -23,7 +23,7 @@
       "method": "tap"
     },
     "AC-004": {
-      "status": "fail",
+      "status": "pass",
       "testName": "@spec:AC-004 /v3/api-docs publica o documento OpenAPI que identifica a API",
       "method": "tap"
     },
