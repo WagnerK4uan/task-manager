@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -24,6 +25,7 @@ import com.taskmanager.domain.exception.TaskNotFoundException;
 import com.taskmanager.presentation.controller.TaskController;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,5 +173,67 @@ class TaskControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("MALFORMED_REQUEST"))
                 .andExpect(jsonPath("$.path").value("/api/tasks/abc"));
+    }
+
+    @Test
+    @DisplayName("@spec:AC-021 a listagem responde 200 com o array na ordem que o service devolveu")
+    void listagemResponde200ComOArrayNaOrdemDoService() throws Exception {
+        TaskResponse intermediaria = comIdEData(8L, "Revisar o PR", "2026-09-26T11:00:00Z");
+        TaskResponse antiga = comIdEData(9L, "Subir o ambiente", "2026-09-26T10:00:00Z");
+
+        given(service.listar(null, null)).willReturn(List.of(TAREFA, intermediaria, antiga));
+
+        mockMvc.perform(get("/api/tasks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].id").value(7))
+                .andExpect(jsonPath("$[1].id").value(8))
+                .andExpect(jsonPath("$[2].id").value(9))
+                .andExpect(jsonPath("$[0].title").value("Escrever a spec"))
+                .andExpect(jsonPath("$[0].description").value("Critérios em Dado/Quando/Então"))
+                .andExpect(jsonPath("$[0].status").value("PENDENTE"))
+                .andExpect(jsonPath("$[0].priority").value("ALTA"))
+                .andExpect(jsonPath("$[0].dueDate").value("2026-10-15"))
+                .andExpect(jsonPath("$[0].createdAt").exists())
+                .andExpect(jsonPath("$[0].updatedAt").exists());
+    }
+
+    @Test
+    @DisplayName("@spec:AC-022 a query string chega ao service como trecho e situação")
+    void queryStringChegaAoServiceComoTrechoESituacao() throws Exception {
+        given(service.listar("escrever", TaskStatus.PENDENTE)).willReturn(List.of(TAREFA));
+
+        mockMvc.perform(get("/api/tasks").param("title", "escrever").param("status", "PENDENTE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(7));
+
+        verify(service).listar("escrever", TaskStatus.PENDENTE);
+    }
+
+    @Test
+    @DisplayName("@spec:AC-024 situação fora do enum na consulta responde 400, não 500")
+    void situacaoForaDoEnumNaConsultaResponde400() throws Exception {
+        mockMvc.perform(get("/api/tasks").param("status", "URGENTE"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("MALFORMED_REQUEST"))
+                .andExpect(jsonPath("$.path").value("/api/tasks"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(content().string(not(containsString("com.taskmanager"))));
+
+        verifyNoInteractions(service);
+    }
+
+    private static TaskResponse comIdEData(Long id, String titulo, String criadaEm) {
+        return new TaskResponse(
+                id,
+                titulo,
+                null,
+                TaskStatus.PENDENTE,
+                TaskPriority.MEDIA,
+                null,
+                Instant.parse(criadaEm),
+                Instant.parse(criadaEm));
     }
 }

@@ -1,0 +1,42 @@
+{
+  "feature": "004-list-tasks",
+  "timestamp": "2026-09-26T20:03:20.351Z",
+  "gitRev": "a19ca02",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 30,
+  "results": {
+    "AC-021": {
+      "status": "pass",
+      "testName": "@spec:AC-021 a listagem responde 200 com o array na ordem que o service devolveu",
+      "method": "tap"
+    },
+    "AC-022": {
+      "status": "pass",
+      "testName": "@spec:AC-022 os filtros de título e de situação valem juntos, separados e em branco",
+      "method": "tap"
+    },
+    "AC-023": {
+      "status": "pass",
+      "testName": "@spec:AC-023 filtro que não casa nada devolve lista vazia, nunca exceção",
+      "method": "tap"
+    },
+    "AC-024": {
+      "status": "pass",
+      "testName": "@spec:AC-024 situação fora do enum na consulta responde 400, não 500",
+      "method": "tap"
+    },
+    "AC-025": {
+      "status": "pass",
+      "testName": "@spec:AC-025 endereço que a API não publica responde 404 RESOURCE_NOT_FOUND",
+      "method": "tap"
+    },
+    "AC-026": {
+      "status": "pass",
+      "testName": "@spec:AC-026 método não suportado responde 405 e diz o que a rota aceita",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

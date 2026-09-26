@@ -13,7 +13,7 @@ import com.taskmanager.domain.exception.TaskNotFoundException;
 import com.taskmanager.domain.repository.TaskRepository;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +73,45 @@ class TaskServiceTest {
                 .hasMessage("Task not found");
     }
 
+    @Test
+    @DisplayName("@spec:AC-022 os filtros de título e de situação valem juntos, separados e em branco")
+    void filtrosDeTituloESituacaoValemJuntosESeparados() {
+        criar("Escrever a spec", TaskStatus.CONCLUIDA);
+        criar("escrever o teste", TaskStatus.PENDENTE);
+        criar("Revisar o PR", TaskStatus.PENDENTE);
+
+        assertThat(service.listar("escrever", null))
+                .extracting(TaskResponse::title)
+                .containsExactlyInAnyOrder("Escrever a spec", "escrever o teste");
+
+        assertThat(service.listar(null, TaskStatus.PENDENTE))
+                .extracting(TaskResponse::title)
+                .containsExactlyInAnyOrder("escrever o teste", "Revisar o PR");
+
+        assertThat(service.listar("escrever", TaskStatus.PENDENTE))
+                .extracting(TaskResponse::title)
+                .containsExactly("escrever o teste");
+
+        // Espaços só: sem a normalização do service (ASM-017) este filtro não casaria nada.
+        assertThat(service.listar("   ", null))
+                .extracting(TaskResponse::title)
+                .containsExactlyInAnyOrder("Escrever a spec", "escrever o teste", "Revisar o PR");
+    }
+
+    @Test
+    @DisplayName("@spec:AC-023 filtro que não casa nada devolve lista vazia, nunca exceção")
+    void filtroQueNaoCasaNadaDevolveListaVazia() {
+        criar("Revisar o PR", TaskStatus.PENDENTE);
+
+        assertThat(service.listar("inexistente", null)).isEmpty();
+        assertThat(service.listar(null, TaskStatus.EM_ANDAMENTO)).isEmpty();
+    }
+
+    private TaskResponse criar(String titulo, TaskStatus status) {
+        return service.criar(
+                new TaskCreateRequest(titulo, null, status, TaskPriority.MEDIA, null));
+    }
+
     private static final class RepositorioEmMemoria implements TaskRepository {
 
         private final Map<Long, Task> tarefas = new HashMap<>();
@@ -93,7 +132,15 @@ class TaskServiceTest {
 
         @Override
         public List<Task> buscar(String titulo, TaskStatus status) {
-            return new ArrayList<>(tarefas.values());
+            return tarefas.values().stream()
+                    .filter(tarefa -> titulo == null || contemTrecho(tarefa.getTitle(), titulo))
+                    .filter(tarefa -> status == null || tarefa.getStatus() == status)
+                    .sorted(Comparator.comparing(Task::getCreatedAt).reversed())
+                    .toList();
+        }
+
+        private static boolean contemTrecho(String titulo, String trecho) {
+            return titulo.toLowerCase().contains(trecho.toLowerCase());
         }
 
         @Override
