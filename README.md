@@ -5,11 +5,14 @@ consultar por id, atualizar, alterar status e excluir. Monorepo com dois
 artefatos independentes — API em Java 21 com Spring Boot e interface em
 Angular — que se comunicam apenas por HTTP.
 
-> **Estado atual:** a fundação (feature
-> [`001-project-setup`](specs/features/001-project-setup/spec.md)) está
-> implementada: o ambiente sobe inteiro por Docker, o schema é criado por
-> migration e o contrato da API é publicado. Os endpoints de tarefa chegam
-> nas features seguintes — hoje `/api/tasks` ainda responde 404.
+> **Estado atual:** três features implementadas e auditadas — a fundação
+> ([`001-project-setup`](specs/features/001-project-setup/spec.md)), o domínio
+> da tarefa com a porta de persistência
+> ([`002-task-domain`](specs/features/002-task-domain/spec.md)) e as duas
+> primeiras rotas ([`003-create-task`](specs/features/003-create-task/spec.md)):
+> `POST /api/tasks` cria e `GET /api/tasks/{id}` consulta. Listagem com
+> filtros, atualização, troca de situação e exclusão chegam nas features
+> seguintes — essas rotas ainda respondem 404.
 
 ## Tecnologias
 
@@ -123,30 +126,38 @@ use o compose.
 
 ## API
 
-| Método | Rota | Sucesso |
-|---|---|---|
-| GET | `/api/tasks?title=&status=` | 200 |
-| GET | `/api/tasks/{id}` | 200 |
-| POST | `/api/tasks` | 201 + header `Location` |
-| PUT | `/api/tasks/{id}` | 200 |
-| PATCH | `/api/tasks/{id}/status` | 200 |
-| DELETE | `/api/tasks/{id}` | 204 |
+| Método | Rota | Sucesso | Estado |
+|---|---|---|---|
+| POST | `/api/tasks` | 201 + header `Location` | implementada |
+| GET | `/api/tasks/{id}` | 200 | implementada |
+| GET | `/api/tasks?title=&status=` | 200 | próxima feature |
+| PUT | `/api/tasks/{id}` | 200 | próxima feature |
+| PATCH | `/api/tasks/{id}/status` | 200 | próxima feature |
+| DELETE | `/api/tasks/{id}` | 204 | próxima feature |
 
-Criar uma tarefa:
+Criar uma tarefa — situação e prioridade são obrigatórias, e o header
+`Location` da resposta é o endereço da tarefa criada:
 
 ```bash
 curl -i -X POST http://localhost:8080/api/tasks \
   -H 'Content-Type: application/json' \
   -d '{
-        "title": "Escrever a spec da feature 002",
-        "description": "Entidade, enums e porta do repositório",
+        "title": "Escrever a spec da feature 004",
+        "description": "Listagem com filtros de título e situação",
         "status": "PENDENTE",
         "priority": "ALTA",
         "dueDate": "2026-10-15"
       }'
 ```
 
-Filtrar a listagem e trocar o status a partir dela:
+Consultar a tarefa criada, pelo endereço que o `Location` devolveu:
+
+```bash
+curl -i http://localhost:8080/api/tasks/1
+```
+
+Filtrar a listagem e trocar a situação a partir dela — rotas das features
+seguintes, ainda não implementadas:
 
 ```bash
 curl 'http://localhost:8080/api/tasks?title=spec&status=PENDENTE'
