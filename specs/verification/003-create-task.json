@@ -1,0 +1,47 @@
+{
+  "feature": "003-create-task",
+  "timestamp": "2026-09-26T17:29:20.093Z",
+  "gitRev": "e6ce8bf",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 23,
+  "results": {
+    "AC-014": {
+      "status": "pass",
+      "testName": "@spec:AC-014 a tarefa criada volta com identificador e datas do servidor",
+      "method": "tap"
+    },
+    "AC-015": {
+      "status": "pass",
+      "testName": "@spec:AC-015 cada campo recusado aparece com o motivo e nada é gravado",
+      "method": "tap"
+    },
+    "AC-016": {
+      "status": "pass",
+      "testName": "@spec:AC-016 corpo ilegível responde 400 sem vazar detalhe interno",
+      "method": "tap"
+    },
+    "AC-017": {
+      "status": "pass",
+      "testName": "@spec:AC-017 a consulta devolve a tarefa que a porta guardou",
+      "method": "tap"
+    },
+    "AC-018": {
+      "status": "pass",
+      "testName": "@spec:AC-018 identificador inexistente vira exceção de domínio, não vazio",
+      "method": "tap"
+    },
+    "AC-019": {
+      "status": "pass",
+      "testName": "@spec:AC-019 o Location devolvido na criação responde 200 com a mesma tarefa",
+      "method": "tap"
+    },
+    "AC-020": {
+      "status": "pass",
+      "testName": "@spec:AC-020 identificador não numérico responde 400, não 500",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

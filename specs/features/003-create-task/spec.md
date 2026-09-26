@@ -1,7 +1,7 @@
 # Spec: 003 — Criação e consulta de tarefa
 
 > feature: 003-create-task
-> status: rascunho
+> status: auditada
 
 <!--
   US-xxx = história de usuário · AC-xxx = critério de aceite
