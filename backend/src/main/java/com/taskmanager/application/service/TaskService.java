@@ -46,6 +46,11 @@ public class TaskService {
         return TaskMapper.paraResposta(repositorio.gravar(tarefa));
     }
 
+    public void excluir(Long id) {
+        carregar(id);
+        repositorio.excluirPorId(id);
+    }
+
     private Task carregar(Long id) {
         return repositorio.buscarPorId(id).orElseThrow(TaskNotFoundException::new);
     }
