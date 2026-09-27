@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.taskmanager.application.dto.TaskCreateRequest;
 import com.taskmanager.application.dto.TaskResponse;
+import com.taskmanager.application.dto.TaskStatusUpdateRequest;
+import com.taskmanager.application.dto.TaskUpdateRequest;
 import com.taskmanager.application.service.TaskService;
 import com.taskmanager.domain.entity.Task;
 import com.taskmanager.domain.enums.TaskPriority;
@@ -105,6 +107,50 @@ class TaskServiceTest {
 
         assertThat(service.listar("inexistente", null)).isEmpty();
         assertThat(service.listar(null, TaskStatus.EM_ANDAMENTO)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("@spec:AC-030 substituir tarefa inexistente vira exceção e não grava nada")
+    void substituirTarefaInexistenteViraExcecao() {
+        assertThatThrownBy(
+                        () ->
+                                service.substituir(
+                                        999L,
+                                        new TaskUpdateRequest(
+                                                "Tarefa que não existe",
+                                                null,
+                                                TaskStatus.PENDENTE,
+                                                TaskPriority.MEDIA,
+                                                null)))
+                .isInstanceOf(TaskNotFoundException.class)
+                .hasMessage("Task not found");
+
+        assertThat(service.listar(null, null)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("@spec:AC-031 a troca de situação muda a situação e preserva os outros campos")
+    void trocaDeSituacaoMudaSomenteASituacao() {
+        TaskResponse antes =
+                service.criar(
+                        new TaskCreateRequest(
+                                "Revisar o PR",
+                                "Conferir os testes da edição",
+                                TaskStatus.PENDENTE,
+                                TaskPriority.ALTA,
+                                LocalDate.of(2026, 11, 20)));
+
+        TaskResponse depois =
+                service.alterarStatus(
+                        antes.id(), new TaskStatusUpdateRequest(TaskStatus.CONCLUIDA));
+
+        assertThat(depois.status()).isEqualTo(TaskStatus.CONCLUIDA);
+        assertThat(depois.id()).isEqualTo(antes.id());
+        assertThat(depois.title()).isEqualTo(antes.title());
+        assertThat(depois.description()).isEqualTo(antes.description());
+        assertThat(depois.priority()).isEqualTo(antes.priority());
+        assertThat(depois.dueDate()).isEqualTo(antes.dueDate());
+        assertThat(depois.createdAt()).isEqualTo(antes.createdAt());
     }
 
     private TaskResponse criar(String titulo, TaskStatus status) {

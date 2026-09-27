@@ -4,13 +4,16 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.taskmanager.application.dto.TaskCreateRequest;
 import com.taskmanager.application.dto.TaskResponse;
+import com.taskmanager.application.dto.TaskStatusUpdateRequest;
+import com.taskmanager.application.dto.TaskUpdateRequest;
 import com.taskmanager.application.service.TaskService;
 import com.taskmanager.domain.enums.TaskPriority;
 import com.taskmanager.domain.enums.TaskStatus;
@@ -223,6 +228,122 @@ class TaskControllerTest {
                 .andExpect(content().string(not(containsString("com.taskmanager"))));
 
         verifyNoInteractions(service);
+    }
+
+    @Test
+    @DisplayName("@spec:AC-028 a substituição recusa cada campo obrigatório inválido e não chama a aplicação")
+    void substituicaoRecusaCadaCampoObrigatorioInvalido() throws Exception {
+        String corpoInvalido =
+                """
+                {
+                  "title": "   ",
+                  "status": null,
+                  "priority": null
+                }
+                """;
+
+        mockMvc.perform(
+                        put("/api/tasks/7")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(corpoInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.path").value("/api/tasks/7"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(
+                        jsonPath("$.fields[*].field")
+                                .value(containsInAnyOrder("title", "status", "priority")))
+                .andExpect(
+                        jsonPath("$.fields[?(@.field == 'title')].message")
+                                .value("O título é obrigatório"));
+
+        verify(service, never()).substituir(any(), any(TaskUpdateRequest.class));
+    }
+
+    @Test
+    @DisplayName("@spec:AC-029 a substituição aceita prazo no passado e responde 200")
+    void substituicaoAceitaPrazoNoPassado() throws Exception {
+        TaskResponse atrasada =
+                new TaskResponse(
+                        7L,
+                        "Título corrigido",
+                        null,
+                        TaskStatus.PENDENTE,
+                        TaskPriority.ALTA,
+                        LocalDate.of(2020, 1, 1),
+                        Instant.parse("2026-09-26T12:00:00Z"),
+                        Instant.parse("2026-09-27T12:00:00Z"));
+        given(service.substituir(eq(7L), any(TaskUpdateRequest.class))).willReturn(atrasada);
+
+        String corpoComPrazoVencido =
+                """
+                {
+                  "title": "Título corrigido",
+                  "status": "PENDENTE",
+                  "priority": "ALTA",
+                  "dueDate": "2020-01-01"
+                }
+                """;
+
+        mockMvc.perform(
+                        put("/api/tasks/7")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(corpoComPrazoVencido))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(7))
+                .andExpect(jsonPath("$.title").value("Título corrigido"))
+                .andExpect(jsonPath("$.dueDate").value("2020-01-01"));
+
+        verify(service).substituir(eq(7L), any(TaskUpdateRequest.class));
+    }
+
+    @Test
+    @DisplayName("@spec:AC-032 situação ausente é VALIDATION_ERROR e fora do enum é MALFORMED_REQUEST")
+    void situacaoAusenteOuForaDoEnumNaTrocaERecusada() throws Exception {
+        mockMvc.perform(
+                        patch("/api/tasks/7/status")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"status\": null}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.path").value("/api/tasks/7/status"))
+                .andExpect(jsonPath("$.fields[*].field").value(containsInAnyOrder("status")))
+                .andExpect(
+                        jsonPath("$.fields[?(@.field == 'status')].message")
+                                .value("A situação é obrigatória"));
+
+        mockMvc.perform(
+                        patch("/api/tasks/7/status")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"status\": \"URGENTE\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("MALFORMED_REQUEST"))
+                .andExpect(jsonPath("$.fields").doesNotExist())
+                .andExpect(content().string(not(containsString("com.taskmanager"))));
+
+        verify(service, never()).alterarStatus(any(), any(TaskStatusUpdateRequest.class));
+    }
+
+    @Test
+    @DisplayName("@spec:AC-033 trocar a situação de tarefa inexistente responde 404 no contrato único")
+    void trocarSituacaoDeTarefaInexistenteResponde404() throws Exception {
+        willThrow(new TaskNotFoundException())
+                .given(service)
+                .alterarStatus(eq(999L), any(TaskStatusUpdateRequest.class));
+
+        mockMvc.perform(
+                        patch("/api/tasks/999/status")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"status\": \"CONCLUIDA\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("TASK_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Task not found"))
+                .andExpect(jsonPath("$.path").value("/api/tasks/999/status"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(content().string(not(containsString("Exception"))));
     }
 
     private static TaskResponse comIdEData(Long id, String titulo, String criadaEm) {

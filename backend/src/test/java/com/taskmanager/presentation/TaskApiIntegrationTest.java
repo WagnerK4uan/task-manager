@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,11 +92,83 @@ class TaskApiIntegrationTest extends PostgresIntegrationTest {
         assertThat(erro.path("path").asString()).isEqualTo("/api/tasks");
     }
 
+    @Test
+    @DisplayName("@spec:AC-027 a substituição troca os cinco campos, mantém o createdAt e move o updatedAt")
+    void substituicaoTrocaOsCincoCamposEPreservaAOrigem() throws Exception {
+        ObjectMapper json = new ObjectMapper();
+
+        String criacao =
+                """
+                {
+                  "title": "Tarefa original",
+                  "description": "Descrição original",
+                  "status": "PENDENTE",
+                  "priority": "BAIXA",
+                  "dueDate": "2026-12-01"
+                }
+                """;
+
+        HttpResponse<String> criada = requisicao("POST", "/api/tasks", criacao);
+        assertThat(criada.statusCode()).isEqualTo(201);
+
+        JsonNode antes = json.readTree(criada.body());
+        long id = antes.path("id").asLong();
+        Instant criadaEm = Instant.parse(antes.path("createdAt").asString());
+        Instant alteradaEm = Instant.parse(antes.path("updatedAt").asString());
+
+        String substituicao =
+                """
+                {
+                  "title": "Tarefa substituída",
+                  "description": "Descrição nova",
+                  "status": "CONCLUIDA",
+                  "priority": "ALTA",
+                  "dueDate": "2027-03-10"
+                }
+                """;
+
+        HttpResponse<String> resposta = requisicao("PUT", "/api/tasks/" + id, substituicao);
+        assertThat(resposta.statusCode()).isEqualTo(200);
+
+        JsonNode depois = json.readTree(resposta.body());
+        assertThat(depois.path("id").asLong()).isEqualTo(id);
+        assertThat(depois.path("title").asString()).isEqualTo("Tarefa substituída");
+        assertThat(depois.path("description").asString()).isEqualTo("Descrição nova");
+        assertThat(depois.path("status").asString()).isEqualTo("CONCLUIDA");
+        assertThat(depois.path("priority").asString()).isEqualTo("ALTA");
+        assertThat(depois.path("dueDate").asString()).isEqualTo("2027-03-10");
+        assertThat(Instant.parse(depois.path("createdAt").asString())).isEqualTo(criadaEm);
+        assertThat(Instant.parse(depois.path("updatedAt").asString())).isAfter(alteradaEm);
+
+        HttpResponse<String> consulta = requisicao("GET", "/api/tasks/" + id);
+        assertThat(consulta.statusCode()).isEqualTo(200);
+
+        JsonNode gravada = json.readTree(consulta.body());
+        assertThat(gravada.path("title").asString()).isEqualTo("Tarefa substituída");
+        assertThat(gravada.path("description").asString()).isEqualTo("Descrição nova");
+        assertThat(gravada.path("status").asString()).isEqualTo("CONCLUIDA");
+        assertThat(gravada.path("priority").asString()).isEqualTo("ALTA");
+        assertThat(gravada.path("dueDate").asString()).isEqualTo("2027-03-10");
+        assertThat(Instant.parse(gravada.path("createdAt").asString())).isEqualTo(criadaEm);
+        assertThat(Instant.parse(gravada.path("updatedAt").asString())).isAfter(alteradaEm);
+    }
+
     private HttpResponse<String> requisicao(String metodo, String caminho) throws Exception {
         return HttpClient.newHttpClient()
                 .send(
                         HttpRequest.newBuilder(URI.create(urlDaApi(caminho)))
                                 .method(metodo, HttpRequest.BodyPublishers.noBody())
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> requisicao(String metodo, String caminho, String corpo)
+            throws Exception {
+        return HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder(URI.create(urlDaApi(caminho)))
+                                .header("Content-Type", "application/json")
+                                .method(metodo, HttpRequest.BodyPublishers.ofString(corpo))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString());
     }
