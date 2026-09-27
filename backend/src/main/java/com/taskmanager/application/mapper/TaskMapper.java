@@ -2,6 +2,7 @@ package com.taskmanager.application.mapper;
 
 import com.taskmanager.application.dto.TaskCreateRequest;
 import com.taskmanager.application.dto.TaskResponse;
+import com.taskmanager.application.dto.TaskUpdateRequest;
 import com.taskmanager.domain.entity.Task;
 
 public final class TaskMapper {
@@ -15,6 +16,14 @@ public final class TaskMapper {
                 request.status(),
                 request.priority(),
                 request.dueDate());
+    }
+
+    public static void aplicar(Task task, TaskUpdateRequest request) {
+        task.setTitle(request.title());
+        task.setDescription(request.description());
+        task.setStatus(request.status());
+        task.setPriority(request.priority());
+        task.setDueDate(request.dueDate());
     }
 
     public static TaskResponse paraResposta(Task task) {
