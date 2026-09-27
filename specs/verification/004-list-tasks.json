@@ -1,11 +1,11 @@
 {
   "feature": "004-list-tasks",
-  "timestamp": "2026-09-27T21:32:42.536Z",
-  "gitRev": "c911221",
+  "timestamp": "2026-09-27T23:31:54.981Z",
+  "gitRev": "4efffad",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
-  "testsParsed": 37,
+  "testsParsed": 44,
   "results": {
     "AC-021": {
       "status": "pass",

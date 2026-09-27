@@ -1,0 +1,32 @@
+{
+  "feature": "006-delete-task",
+  "timestamp": "2026-09-27T23:29:44.149Z",
+  "gitRev": "4efffad",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 44,
+  "results": {
+    "AC-034": {
+      "status": "pass",
+      "testName": "@spec:AC-034 a exclusão tira a tarefa da porta e não encosta nas demais",
+      "method": "tap"
+    },
+    "AC-035": {
+      "status": "pass",
+      "testName": "@spec:AC-035 excluir tarefa inexistente vira exceção e não remove nada",
+      "method": "tap"
+    },
+    "AC-036": {
+      "status": "pass",
+      "testName": "@spec:AC-036 a segunda exclusão do mesmo id é 404 e deixa o servidor no mesmo estado",
+      "method": "tap"
+    },
+    "AC-037": {
+      "status": "pass",
+      "testName": "@spec:AC-037 o Allow da tarefa passa a incluir a exclusão e a coleção continua sem ela",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

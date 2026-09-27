@@ -1,7 +1,7 @@
 # Spec: 006 — Exclusão da tarefa
 
 > feature: 006-delete-task
-> status: em-implementacao
+> status: auditada
 
 ## Objetivo
 

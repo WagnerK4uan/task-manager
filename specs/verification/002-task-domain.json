@@ -1,11 +1,11 @@
 {
   "feature": "002-task-domain",
-  "timestamp": "2026-09-27T21:31:40.759Z",
-  "gitRev": "c911221",
+  "timestamp": "2026-09-27T23:30:53.850Z",
+  "gitRev": "4efffad",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
-  "testsParsed": 37,
+  "testsParsed": 44,
   "results": {
     "AC-008": {
       "status": "pass",

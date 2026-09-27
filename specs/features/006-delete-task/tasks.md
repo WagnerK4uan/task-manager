@@ -17,25 +17,25 @@
   se o service carrega antes de excluir e o sentido da AC-036.
 -->
 
-## T-035 — Exclusão no service [pendente]
+## T-035 — Exclusão no service [concluida]
 
 - Refs: US-012, AC-034, AC-035, AC-036
 - Arquivos: backend/src/main/java/com/taskmanager/application/service/TaskService.java
 - Notas: um `excluir(Long id)` `void`, que chama o `carregar(id)` privado — a mesma tradução de ausência em `TaskNotFoundException` que a T-019 da 003 criou, agora no quarto chamador — e em seguida `repositorio.excluirPorId(id)`. Não devolve a tarefa excluída (RNF-27). Sem `@Transactional`: a consequência está na ASM-023. A porta não muda (RNF-24) e não ganha `existe(id)` (ASM-022). Altera arquivo da T-024 da 004.
 
-## T-036 — Rota de exclusão no controller [pendente]
+## T-036 — Rota de exclusão no controller [concluida]
 
 - Refs: US-012, AC-034, AC-037
 - Arquivos: backend/src/main/java/com/taskmanager/presentation/controller/TaskController.java
 - Notas: `@DeleteMapping("/{id}")` com `@PathVariable Long id`, método `void` e `@ResponseStatus(HttpStatus.NO_CONTENT)` — sem `ResponseEntity`, pela razão registrada em "Impacto técnico". Nada de lógica e nada de `try/catch` (RNF-25). Só a rota do item ganha o método: a coleção continua sem `DELETE`, o que mantém a AC-026 da 004 verdadeira e é metade da AC-037. Depende de T-035.
 
-## T-037 — Prova executável da exclusão [pendente]
+## T-037 — Prova executável da exclusão [concluida]
 
 - Refs: AC-034, AC-035, AC-036, AC-037
 - Arquivos: backend/src/test/java/com/taskmanager/application/TaskServiceTest.java, backend/src/test/java/com/taskmanager/presentation/TaskControllerTest.java, backend/src/test/java/com/taskmanager/presentation/TaskApiIntegrationTest.java
 - Notas: as três classes existentes são estendidas, cada critério no nível onde ele é observável. `TaskApiIntegrationTest` cobre a AC-034 (204 sem corpo, consulta seguinte 404, a outra tarefa intacta na listagem), a AC-036 (duas exclusões seguidas: 204 e depois 404, contra o banco real) e a AC-037 (o header `Allow` só se observa na aplicação de pé, com o dispatcher decidindo — é onde a AC-026 da 004 já mora). `TaskControllerTest` cobre a AC-034 no que é dela — 204 com corpo vazio e a delegação ao service, que é o que o `@ResponseStatus` decide — e a AC-035 com o service mockado lançando `TaskNotFoundException`, verificando os cinco campos do corpo de erro. `TaskServiceTest` cobre AC-034 e AC-035 no nível do duplo em memória: a tarefa sai do mapa, e id ausente lança sem que nada seja removido. Um `@DisplayName` com `@spec:AC-xxx` por critério. O verify é o último passo, depois dos commits e dos saves (L-003).
 
-## T-038 — README e a ressalva envelhecida da 004 [pendente]
+## T-038 — README e a ressalva envelhecida da 004 [concluida]
 
 - Refs: US-012
 - Arquivos: README.md, specs/features/004-list-tasks/spec.md
