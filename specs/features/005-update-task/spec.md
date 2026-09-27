@@ -1,7 +1,7 @@
 # Spec: 005 — Substituição e troca de situação da tarefa
 
 > feature: 005-update-task
-> status: em-implementacao
+> status: auditada
 
 ## Objetivo
 

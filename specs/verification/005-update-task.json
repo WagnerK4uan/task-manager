@@ -1,0 +1,47 @@
+{
+  "feature": "005-update-task",
+  "timestamp": "2026-09-27T14:46:20.793Z",
+  "gitRev": "760999d",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 37,
+  "results": {
+    "AC-027": {
+      "status": "pass",
+      "testName": "@spec:AC-027 a substituição troca os cinco campos, mantém o createdAt e move o updatedAt",
+      "method": "tap"
+    },
+    "AC-028": {
+      "status": "pass",
+      "testName": "@spec:AC-028 a substituição recusa cada campo obrigatório inválido e não chama a aplicação",
+      "method": "tap"
+    },
+    "AC-029": {
+      "status": "pass",
+      "testName": "@spec:AC-029 a substituição aceita prazo no passado e responde 200",
+      "method": "tap"
+    },
+    "AC-030": {
+      "status": "pass",
+      "testName": "@spec:AC-030 substituir tarefa inexistente vira exceção e não grava nada",
+      "method": "tap"
+    },
+    "AC-031": {
+      "status": "pass",
+      "testName": "@spec:AC-031 a troca de situação muda a situação e preserva os outros campos",
+      "method": "tap"
+    },
+    "AC-032": {
+      "status": "pass",
+      "testName": "@spec:AC-032 situação ausente é VALIDATION_ERROR e fora do enum é MALFORMED_REQUEST",
+      "method": "tap"
+    },
+    "AC-033": {
+      "status": "pass",
+      "testName": "@spec:AC-033 trocar a situação de tarefa inexistente responde 404 no contrato único",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}
