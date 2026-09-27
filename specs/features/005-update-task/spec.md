@@ -1,7 +1,7 @@
 # Spec: 005 — Substituição e troca de situação da tarefa
 
 > feature: 005-update-task
-> status: rascunho
+> status: em-implementacao
 
 ## Objetivo
 
@@ -216,12 +216,12 @@ Decisões:
 
 | ID | Suposição | Status | Resolução |
 |---|---|---|---|
-| ASM-018 | `PUT` é substituição total: campo opcional omitido no corpo (`description`, `dueDate`) apaga o valor gravado, em vez de preservá-lo. É o significado do verbo, e preservar o valor omitido faria o `PUT` virar um `PATCH` disfarçado — sem que o cliente tenha como apagar um campo. | aberta | — |
-| ASM-019 | Nenhum controle de concorrência: o ciclo ler-alterar-gravar não é atômico, e duas edições simultâneas na mesma tarefa terminam com a última sobrescrevendo a primeira sem aviso. `@Version` resolveria, ao custo de uma coluna nova, uma migration e um 409 no contrato de erro — assumido agora porque não há requisito de concorrência. | aberta | — |
-| ASM-020 | Nenhuma detecção de escrita inócua: `PATCH` com a situação que a tarefa já tem grava de novo e move o `updatedAt`. Comparar antes de gravar economizaria um `update` e custaria um `if` mais um teste; assumido porque `updatedAt` significa "última escrita aceita", não "última mudança de valor". | aberta | — |
+| ASM-018 | `PUT` é substituição total: campo opcional omitido no corpo (`description`, `dueDate`) apaga o valor gravado, em vez de preservá-lo. É o significado do verbo, e preservar o valor omitido faria o `PUT` virar um `PATCH` disfarçado — sem que o cliente tenha como apagar um campo. | confirmada | Confirmada em 27/09/2026: `PUT` é substituição total; campo opcional omitido apaga o valor gravado |
+| ASM-019 | Nenhum controle de concorrência: o ciclo ler-alterar-gravar não é atômico, e duas edições simultâneas na mesma tarefa terminam com a última sobrescrevendo a primeira sem aviso. `@Version` resolveria, ao custo de uma coluna nova, uma migration e um 409 no contrato de erro — assumido agora porque não há requisito de concorrência. | confirmada | Confirmada em 27/09/2026: sem controle de concorrência; `@Version` e 409 entram só se houver requisito |
+| ASM-020 | Nenhuma detecção de escrita inócua: `PATCH` com a situação que a tarefa já tem grava de novo e move o `updatedAt`. Comparar antes de gravar economizaria um `update` e custaria um `if` mais um teste; assumido porque `updatedAt` significa "última escrita aceita", não "última mudança de valor". | confirmada | Confirmada em 27/09/2026: escrita aceita move o `updatedAt`, mesmo sem mudança de valor |
 
 ## Perguntas em aberto
 
 | ID | Pergunta | Status | Resposta |
 |---|---|---|---|
-| Q-007 | A criação recusa prazo no passado (`@FutureOrPresent`, AC-015 da 003). Na edição a mesma regra tem um efeito colateral: uma tarefa que venceu não pode mais ter o título corrigido sem que o prazo seja mexido também — e a tela de edição da 008 bateria nisso em toda tarefa atrasada. Recomendação: não aplicar `@FutureOrPresent` no `TaskUpdateRequest`, porque prazo no passado é uma descrição legítima de tarefa atrasada, e a regra da criação existe para não *assumir* um compromisso vencido. O preço é que o cliente passa a poder gravar um prazo no passado de propósito. Se a resposta for manter a regra, a AC-029 se inverte antes da implementação. | aberta | — |
+| Q-007 | A criação recusa prazo no passado (`@FutureOrPresent`, AC-015 da 003). Na edição a mesma regra tem um efeito colateral: uma tarefa que venceu não pode mais ter o título corrigido sem que o prazo seja mexido também — e a tela de edição da 008 bateria nisso em toda tarefa atrasada. Recomendação: não aplicar `@FutureOrPresent` no `TaskUpdateRequest`, porque prazo no passado é uma descrição legítima de tarefa atrasada, e a regra da criação existe para não *assumir* um compromisso vencido. O preço é que o cliente passa a poder gravar um prazo no passado de propósito. Se a resposta for manter a regra, a AC-029 se inverte antes da implementação. | respondida | Respondida em 27/09/2026: `@FutureOrPresent` não entra no `TaskUpdateRequest` — prazo no passado é aceito na edição e recusado na criação; a AC-029 fica como está |
