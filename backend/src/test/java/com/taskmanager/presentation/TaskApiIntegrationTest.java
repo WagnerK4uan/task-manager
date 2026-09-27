@@ -153,6 +153,83 @@ class TaskApiIntegrationTest extends PostgresIntegrationTest {
         assertThat(Instant.parse(gravada.path("updatedAt").asString())).isAfter(alteradaEm);
     }
 
+    @Test
+    @DisplayName("@spec:AC-034 a exclusão responde 204 sem corpo e a tarefa deixa de existir")
+    void exclusaoResponde204EATarefaDeixaDeExistir() throws Exception {
+        ObjectMapper json = new ObjectMapper();
+
+        long excluida = criarTarefa("Tarefa a excluir AC-034");
+        long mantida = criarTarefa("Tarefa a manter AC-034");
+
+        HttpResponse<String> exclusao = requisicao("DELETE", "/api/tasks/" + excluida);
+        assertThat(exclusao.statusCode()).isEqualTo(204);
+        assertThat(exclusao.body()).isEmpty();
+
+        HttpResponse<String> consulta = requisicao("GET", "/api/tasks/" + excluida);
+        assertThat(consulta.statusCode()).isEqualTo(404);
+        assertThat(json.readTree(consulta.body()).path("error").asString())
+                .isEqualTo("TASK_NOT_FOUND");
+
+        assertThat(requisicao("GET", "/api/tasks/" + mantida).statusCode()).isEqualTo(200);
+
+        HttpResponse<String> listagem = requisicao("GET", "/api/tasks?title=AC-034");
+        assertThat(listagem.statusCode()).isEqualTo(200);
+        assertThat(listagem.body())
+                .contains("Tarefa a manter AC-034")
+                .doesNotContain("Tarefa a excluir AC-034");
+    }
+
+    @Test
+    @DisplayName("@spec:AC-036 a segunda exclusão do mesmo id é 404 e deixa o servidor no mesmo estado")
+    void segundaExclusaoDoMesmoIdResponde404() throws Exception {
+        long id = criarTarefa("Tarefa excluída duas vezes AC-036");
+
+        assertThat(requisicao("DELETE", "/api/tasks/" + id).statusCode()).isEqualTo(204);
+
+        HttpResponse<String> segunda = requisicao("DELETE", "/api/tasks/" + id);
+        assertThat(segunda.statusCode()).isEqualTo(404);
+
+        JsonNode erro = new ObjectMapper().readTree(segunda.body());
+        assertThat(erro.path("status").asInt()).isEqualTo(404);
+        assertThat(erro.path("error").asString()).isEqualTo("TASK_NOT_FOUND");
+        assertThat(erro.path("path").asString()).isEqualTo("/api/tasks/" + id);
+
+        assertThat(requisicao("GET", "/api/tasks/" + id).statusCode()).isEqualTo(404);
+    }
+
+    @Test
+    @DisplayName("@spec:AC-037 o Allow da tarefa passa a incluir a exclusão e a coleção continua sem ela")
+    void exclusaoEDaTarefaNaoDaColecao() throws Exception {
+        long id = criarTarefa("Tarefa do Allow AC-037");
+
+        HttpResponse<String> item = requisicao("POST", "/api/tasks/" + id, "{}");
+        assertThat(item.statusCode()).isEqualTo(405);
+        assertThat(item.headers().firstValue("Allow").orElseThrow())
+                .contains("GET", "PUT", "DELETE");
+        assertThat(new ObjectMapper().readTree(item.body()).path("error").asString())
+                .isEqualTo("METHOD_NOT_ALLOWED");
+
+        HttpResponse<String> colecao = requisicao("DELETE", "/api/tasks");
+        assertThat(colecao.statusCode()).isEqualTo(405);
+        assertThat(colecao.headers().firstValue("Allow").orElseThrow()).doesNotContain("DELETE");
+    }
+
+    private long criarTarefa(String titulo) throws Exception {
+        String corpo =
+                """
+                {
+                  "title": "%s",
+                  "status": "PENDENTE",
+                  "priority": "MEDIA"
+                }
+                """
+                        .formatted(titulo);
+
+        HttpResponse<String> criada = requisicao("POST", "/api/tasks", corpo);
+        assertThat(criada.statusCode()).isEqualTo(201);
+        return new ObjectMapper().readTree(criada.body()).path("id").asLong();
+    }
+
     private HttpResponse<String> requisicao(String metodo, String caminho) throws Exception {
         return HttpClient.newHttpClient()
                 .send(

@@ -10,6 +10,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -342,6 +343,31 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.error").value("TASK_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("Task not found"))
                 .andExpect(jsonPath("$.path").value("/api/tasks/999/status"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(content().string(not(containsString("Exception"))));
+    }
+
+    @Test
+    @DisplayName("@spec:AC-034 a exclusão responde 204 sem corpo e delega ao service")
+    void exclusaoResponde204SemCorpo() throws Exception {
+        mockMvc.perform(delete("/api/tasks/7"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(service).excluir(7L);
+    }
+
+    @Test
+    @DisplayName("@spec:AC-035 excluir tarefa inexistente responde 404 no contrato único")
+    void excluirTarefaInexistenteResponde404() throws Exception {
+        willThrow(new TaskNotFoundException()).given(service).excluir(999L);
+
+        mockMvc.perform(delete("/api/tasks/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("TASK_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Task not found"))
+                .andExpect(jsonPath("$.path").value("/api/tasks/999"))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(content().string(not(containsString("Exception"))));
     }

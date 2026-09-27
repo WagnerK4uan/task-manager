@@ -153,6 +153,35 @@ class TaskServiceTest {
         assertThat(depois.createdAt()).isEqualTo(antes.createdAt());
     }
 
+    @Test
+    @DisplayName("@spec:AC-034 a exclusão tira a tarefa da porta e não encosta nas demais")
+    void exclusaoTiraATarefaDaPorta() {
+        TaskResponse excluida = criar("Tarefa a excluir", TaskStatus.PENDENTE);
+        TaskResponse mantida = criar("Tarefa a manter", TaskStatus.PENDENTE);
+
+        service.excluir(excluida.id());
+
+        assertThatThrownBy(() -> service.buscarPorId(excluida.id()))
+                .isInstanceOf(TaskNotFoundException.class);
+        assertThat(service.listar(null, null))
+                .extracting(TaskResponse::id)
+                .containsExactly(mantida.id());
+    }
+
+    @Test
+    @DisplayName("@spec:AC-035 excluir tarefa inexistente vira exceção e não remove nada")
+    void excluirTarefaInexistenteViraExcecao() {
+        TaskResponse mantida = criar("Tarefa a manter", TaskStatus.PENDENTE);
+
+        assertThatThrownBy(() -> service.excluir(999L))
+                .isInstanceOf(TaskNotFoundException.class)
+                .hasMessage("Task not found");
+
+        assertThat(service.listar(null, null))
+                .extracting(TaskResponse::id)
+                .containsExactly(mantida.id());
+    }
+
     private TaskResponse criar(String titulo, TaskStatus status) {
         return service.criar(
                 new TaskCreateRequest(titulo, null, status, TaskPriority.MEDIA, null));
