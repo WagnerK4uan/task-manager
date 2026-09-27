@@ -1,7 +1,7 @@
 {
   "feature": "004-list-tasks",
-  "timestamp": "2026-09-27T14:48:52.599Z",
-  "gitRev": "760999d",
+  "timestamp": "2026-09-27T21:32:42.536Z",
+  "gitRev": "c911221",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,

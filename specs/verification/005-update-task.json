@@ -1,7 +1,7 @@
 {
   "feature": "005-update-task",
-  "timestamp": "2026-09-27T14:46:20.793Z",
-  "gitRev": "760999d",
+  "timestamp": "2026-09-27T21:33:13.502Z",
+  "gitRev": "c911221",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,

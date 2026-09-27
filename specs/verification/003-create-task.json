@@ -1,7 +1,7 @@
 {
   "feature": "003-create-task",
-  "timestamp": "2026-09-27T14:48:34.969Z",
-  "gitRev": "760999d",
+  "timestamp": "2026-09-27T21:32:10.905Z",
+  "gitRev": "c911221",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,

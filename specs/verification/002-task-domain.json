@@ -1,7 +1,7 @@
 {
   "feature": "002-task-domain",
-  "timestamp": "2026-09-27T14:48:17.253Z",
-  "gitRev": "760999d",
+  "timestamp": "2026-09-27T21:31:40.759Z",
+  "gitRev": "c911221",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
