@@ -95,7 +95,7 @@ errei a requisição em vez de suspeitar que o serviço caiu.
 #### AC-026 — Método não suportado responde 405, e diz o que a rota aceita
 
 - **Dado** uma rota que existe mas não aceita o método pedido (`DELETE
-  /api/tasks`, enquanto a exclusão não existe)
+  /api/tasks`, porque a exclusão é da tarefa e não da coleção)
 - **Quando** ela é requisitada contra a aplicação de pé
 - **Então** a resposta é 405 com `error` igual a `METHOD_NOT_ALLOWED`, no mesmo
   contrato de erro, e o header `Allow` lista os métodos que a rota aceita —

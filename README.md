@@ -5,20 +5,22 @@ consultar por id, atualizar, alterar status e excluir. Monorepo com dois
 artefatos independentes — API em Java 21 com Spring Boot e interface em
 Angular — que se comunicam apenas por HTTP.
 
-> **Estado atual:** cinco features implementadas e auditadas — a fundação
+> **Estado atual:** o backend está completo — seis features implementadas e
+> auditadas: a fundação
 > ([`001-project-setup`](specs/features/001-project-setup/spec.md)), o domínio
 > da tarefa com a porta de persistência
 > ([`002-task-domain`](specs/features/002-task-domain/spec.md)), as duas
 > primeiras rotas ([`003-create-task`](specs/features/003-create-task/spec.md)),
 > a listagem com filtros
-> ([`004-list-tasks`](specs/features/004-list-tasks/spec.md)) e a edição
-> ([`005-update-task`](specs/features/005-update-task/spec.md)):
+> ([`004-list-tasks`](specs/features/004-list-tasks/spec.md)), a edição
+> ([`005-update-task`](specs/features/005-update-task/spec.md)) e a exclusão
+> ([`006-delete-task`](specs/features/006-delete-task/spec.md)):
 > `POST /api/tasks` cria, `GET /api/tasks` lista filtrando por título e
 > situação, `GET /api/tasks/{id}` consulta, `PUT /api/tasks/{id}` substitui a
-> tarefa inteira e `PATCH /api/tasks/{id}/status` troca só a situação. Só a
-> exclusão chega na feature seguinte — hoje responde 405 com o header `Allow`,
-> porque o endereço existe e o método não; endereço que nem existe é 404
-> `RESOURCE_NOT_FOUND`.
+> tarefa inteira, `PATCH /api/tasks/{id}/status` troca só a situação e
+> `DELETE /api/tasks/{id}` exclui. As seis rotas do CRUD existem; o que falta é
+> a interface. Método que uma rota não aceita é 405 com o header `Allow`, e
+> endereço que nem existe é 404 `RESOURCE_NOT_FOUND`.
 
 ## Tecnologias
 
@@ -139,7 +141,7 @@ use o compose.
 | GET | `/api/tasks?title=&status=` | 200 | implementada |
 | PUT | `/api/tasks/{id}` | 200 | implementada |
 | PATCH | `/api/tasks/{id}/status` | 200 | implementada |
-| DELETE | `/api/tasks/{id}` | 204 | próxima feature |
+| DELETE | `/api/tasks/{id}` | 204 | implementada |
 
 Criar uma tarefa — situação e prioridade são obrigatórias, e o header
 `Location` da resposta é o endereço da tarefa criada:
@@ -203,6 +205,17 @@ curl -X PATCH http://localhost:8080/api/tasks/1/status \
 
 Identificador que não existe é 404 `TASK_NOT_FOUND` nas duas rotas — `PUT` não
 cria tarefa, porque quem gera o identificador é o banco.
+
+Excluir uma tarefa — a resposta é 204 e não tem corpo:
+
+```bash
+curl -i -X DELETE http://localhost:8080/api/tasks/1
+```
+
+A exclusão é definitiva: não há lixeira nem desfazer. A segunda exclusão do
+mesmo identificador é 404 `TASK_NOT_FOUND` — o efeito no servidor é o mesmo das
+duas vezes, é só a resposta que difere. A exclusão é da tarefa, não da coleção:
+`DELETE /api/tasks` continua respondendo 405.
 
 Todo erro tem a mesma forma:
 
