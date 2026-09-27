@@ -5,18 +5,20 @@ consultar por id, atualizar, alterar status e excluir. Monorepo com dois
 artefatos independentes — API em Java 21 com Spring Boot e interface em
 Angular — que se comunicam apenas por HTTP.
 
-> **Estado atual:** quatro features implementadas e auditadas — a fundação
+> **Estado atual:** cinco features implementadas e auditadas — a fundação
 > ([`001-project-setup`](specs/features/001-project-setup/spec.md)), o domínio
 > da tarefa com a porta de persistência
 > ([`002-task-domain`](specs/features/002-task-domain/spec.md)), as duas
-> primeiras rotas ([`003-create-task`](specs/features/003-create-task/spec.md))
-> e a listagem com filtros
-> ([`004-list-tasks`](specs/features/004-list-tasks/spec.md)):
+> primeiras rotas ([`003-create-task`](specs/features/003-create-task/spec.md)),
+> a listagem com filtros
+> ([`004-list-tasks`](specs/features/004-list-tasks/spec.md)) e a edição
+> ([`005-update-task`](specs/features/005-update-task/spec.md)):
 > `POST /api/tasks` cria, `GET /api/tasks` lista filtrando por título e
-> situação, e `GET /api/tasks/{id}` consulta. Atualização, troca de situação e
-> exclusão chegam nas features seguintes — hoje respondem 405 com o header
-> `Allow` onde o endereço existe e o método não, e 404 `RESOURCE_NOT_FOUND`
-> onde nem o endereço existe.
+> situação, `GET /api/tasks/{id}` consulta, `PUT /api/tasks/{id}` substitui a
+> tarefa inteira e `PATCH /api/tasks/{id}/status` troca só a situação. Só a
+> exclusão chega na feature seguinte — hoje responde 405 com o header `Allow`,
+> porque o endereço existe e o método não; endereço que nem existe é 404
+> `RESOURCE_NOT_FOUND`.
 
 ## Tecnologias
 
@@ -135,8 +137,8 @@ use o compose.
 | POST | `/api/tasks` | 201 + header `Location` | implementada |
 | GET | `/api/tasks/{id}` | 200 | implementada |
 | GET | `/api/tasks?title=&status=` | 200 | implementada |
-| PUT | `/api/tasks/{id}` | 200 | próxima feature |
-| PATCH | `/api/tasks/{id}/status` | 200 | próxima feature |
+| PUT | `/api/tasks/{id}` | 200 | implementada |
+| PATCH | `/api/tasks/{id}/status` | 200 | implementada |
 | DELETE | `/api/tasks/{id}` | 204 | próxima feature |
 
 Criar uma tarefa — situação e prioridade são obrigatórias, e o header
@@ -173,14 +175,34 @@ curl 'http://localhost:8080/api/tasks?title=spec&status=PENDENTE'
 
 Situação fora de `PENDENTE`, `EM_ANDAMENTO` e `CONCLUIDA` é recusada com 400.
 
-Trocar a situação a partir da listagem — rota da feature seguinte, ainda não
-implementada:
+Substituir a tarefa inteira. Os cinco campos do corpo passam a ser os campos da
+tarefa: campo opcional omitido (`description`, `dueDate`) apaga o valor gravado.
+`createdAt` não muda, `updatedAt` avança, e prazo no passado é aceito aqui — ao
+contrário da criação, porque corrigir o título de uma tarefa atrasada não pode
+exigir mexer no prazo dela:
+
+```bash
+curl -i -X PUT http://localhost:8080/api/tasks/1 \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "title": "Escrever a spec da feature 005",
+        "description": "Substituição e troca de situação",
+        "status": "EM_ANDAMENTO",
+        "priority": "ALTA",
+        "dueDate": "2026-10-20"
+      }'
+```
+
+Trocar a situação a partir da listagem, sem reenviar os outros campos:
 
 ```bash
 curl -X PATCH http://localhost:8080/api/tasks/1/status \
   -H 'Content-Type: application/json' \
   -d '{"status": "CONCLUIDA"}'
 ```
+
+Identificador que não existe é 404 `TASK_NOT_FOUND` nas duas rotas — `PUT` não
+cria tarefa, porque quem gera o identificador é o banco.
 
 Todo erro tem a mesma forma:
 
