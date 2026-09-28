@@ -124,3 +124,13 @@
     </form>
   </section>
 </div>
+
+@if (confirmandoExclusao()) {
+  <app-confirm-dialog
+    titulo="Excluir tarefa?"
+    [mensagem]="avisoDeExclusao()"
+    acao="Excluir"
+    (confirmar)="confirmarExclusao()"
+    (cancelar)="cancelarExclusao()"
+  />
+}

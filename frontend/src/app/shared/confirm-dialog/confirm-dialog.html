@@ -1,0 +1,37 @@
+<div class="fixed inset-0 z-30 flex items-center justify-center p-5">
+  <div class="absolute inset-0 veu-entra bg-ink/40" (click)="cancelar.emit()" aria-hidden="true"></div>
+
+  <section
+    class="confirmacao-entra relative w-full max-w-sm rounded-xl border border-rule bg-surface p-6 shadow-2xl"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="confirmacao-titulo"
+    aria-describedby="confirmacao-mensagem"
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+    data-testid="confirmacao"
+  >
+    <h2 id="confirmacao-titulo" class="font-serif text-xl text-ink">{{ titulo() }}</h2>
+    <p id="confirmacao-mensagem" class="mt-2 text-meta text-ink-muted">{{ mensagem() }}</p>
+
+    <div class="mt-6 flex justify-end gap-3">
+      <button
+        type="button"
+        class="rounded-md border border-rule px-4 py-2 text-meta font-medium text-ink hover:bg-paper"
+        (click)="cancelar.emit()"
+        cdkFocusInitial
+        data-testid="confirmacao-cancelar"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-md bg-alta px-4 py-2 text-meta font-medium text-surface hover:opacity-90"
+        (click)="confirmar.emit()"
+        data-testid="confirmacao-aceitar"
+      >
+        {{ acao() }}
+      </button>
+    </div>
+  </section>
+</div>

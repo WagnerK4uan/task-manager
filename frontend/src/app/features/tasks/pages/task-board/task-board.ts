@@ -164,8 +164,6 @@ export class TaskBoard {
   }
 
   async excluirTarefa(tarefa: Task): Promise<void> {
-    if (!window.confirm(`Excluir "${tarefa.title}"?`)) return;
-
     this.aviso.set(null);
 
     try {

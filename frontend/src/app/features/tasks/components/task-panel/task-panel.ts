@@ -7,13 +7,15 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 import { ApiErrorField, Task, TaskPayload, TaskPriority, TaskStatus } from '../../models/task';
 
 @Component({
   selector: 'app-task-panel',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ConfirmDialog],
   templateUrl: './task-panel.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,6 +40,10 @@ export class TaskPanel {
   });
 
   readonly edicao = computed(() => this.tarefa() !== null);
+  readonly confirmandoExclusao = signal(false);
+  readonly avisoDeExclusao = computed(
+    () => `"${this.tarefa()?.title ?? ''}" será removida do quadro. Não há como desfazer.`,
+  );
 
   constructor() {
     effect(() => {
@@ -54,6 +60,11 @@ export class TaskPanel {
 
   @HostListener('document:keydown.escape')
   aoApertarEsc(): void {
+    if (this.confirmandoExclusao()) {
+      this.confirmandoExclusao.set(false);
+      return;
+    }
+
     this.fechar.emit();
   }
 
@@ -70,7 +81,16 @@ export class TaskPanel {
   }
 
   pedirExclusao(): void {
+    this.confirmandoExclusao.set(true);
+  }
+
+  cancelarExclusao(): void {
+    this.confirmandoExclusao.set(false);
+  }
+
+  confirmarExclusao(): void {
     const tarefa = this.tarefa();
+    this.confirmandoExclusao.set(false);
     if (tarefa) this.excluir.emit(tarefa);
   }
 
