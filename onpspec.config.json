@@ -3,7 +3,8 @@
   "testCommand": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "testGlobs": [
-    "backend/src/test/**"
+    "backend/src/test/**",
+    "e2e/**"
   ],
   "srcGlobs": [
     "backend/src/main/**",
@@ -17,6 +18,7 @@
     "**/target/**",
     "**/node_modules/**",
     "**/.angular/**",
-    "frontend/dist/**"
+    "frontend/dist/**",
+    "e2e/results/**"
   ]
 }

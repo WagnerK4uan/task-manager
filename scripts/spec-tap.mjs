@@ -7,6 +7,9 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BACKEND = join(ROOT, 'backend');
 const REPORTS = join(BACKEND, 'target', 'surefire-reports');
+const E2E = join(ROOT, 'e2e');
+const E2E_REPORTS = join(E2E, 'results');
+const ENV_FILE = join(ROOT, '.env');
 const MAVEN_IMAGE = 'maven:3.9-eclipse-temurin-21';
 const DOCKER_SOCKET = '/var/run/docker.sock';
 
@@ -96,6 +99,61 @@ function imprimirCauda(saida, linhas = 40) {
   for (const linha of saida.trimEnd().split(/\r?\n/).slice(-linhas)) comentar(linha);
 }
 
+function e2eDesligado() {
+  const valor = (process.env.SPEC_TAP_E2E ?? '').trim().toLowerCase();
+  return ['0', 'off', 'false', 'no', 'nao'].includes(valor);
+}
+
+function portaDoFrontend() {
+  if (process.env.FRONTEND_PORT) return process.env.FRONTEND_PORT;
+  if (!existsSync(ENV_FILE)) return '4200';
+  const linha = readFileSync(ENV_FILE, 'utf-8')
+    .split(/\r?\n/)
+    .find((l) => /^\s*FRONTEND_PORT\s*=/.test(l));
+  return linha?.split('=')[1]?.trim() || '4200';
+}
+
+function compose(...args) {
+  return spawnSync('docker', ['compose', ...args], {
+    cwd: ROOT,
+    encoding: 'utf-8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
+}
+
+function rodarE2e() {
+  if (existsSync(E2E_REPORTS)) rmSync(E2E_REPORTS, { recursive: true, force: true });
+
+  const inicio = Date.now();
+  const subida = compose('up', '--build', '--detach', '--wait', '--wait-timeout', '300');
+  if (subida.status !== 0) {
+    comentar(`compose não subiu (código ${subida.status})`);
+    imprimirCauda(`${subida.stdout || ''}\n${subida.stderr || ''}`);
+    compose('down');
+    return { casos: [], ok: false };
+  }
+  comentar(`compose de pé em ${Math.round((Date.now() - inicio) / 1000)}s`);
+
+  const e2e = spawnSync('npx', ['playwright', 'test'], {
+    cwd: E2E,
+    encoding: 'utf-8',
+    maxBuffer: 64 * 1024 * 1024,
+    env: { ...process.env, FRONTEND_PORT: portaDoFrontend() },
+  });
+  comentar(`E2E terminou com código ${e2e.status}`);
+
+  const casos = lerRelatorios(E2E_REPORTS);
+  if (casos.length === 0 || e2e.status !== 0) {
+    imprimirCauda(`${e2e.stdout || ''}\n${e2e.stderr || ''}`);
+  }
+
+  if (compose('down').status !== 0) {
+    comentar('`docker compose down` falhou: containers podem ter ficado de pé');
+  }
+
+  return { casos, ok: e2e.status === 0 && casos.length > 0 };
+}
+
 const plano = temJdk() ? comandoLocal() : comandoContainer();
 comentar(plano.descricao);
 
@@ -110,7 +168,17 @@ const build = spawnSync(plano.cmd, plano.args, {
 const saida = `${build.stdout || ''}\n${build.stderr || ''}`;
 comentar(`build terminou em ${Math.round((Date.now() - inicio) / 1000)}s com código ${build.status}`);
 
-const casos = lerRelatorios(REPORTS);
+const casosBackend = lerRelatorios(REPORTS);
+
+let casosE2e = [];
+let e2eOk = true;
+if (e2eDesligado()) {
+  comentar('E2E desligado por SPEC_TAP_E2E: sem casos de tela no TAP, os critérios de tela ficam sem prova');
+} else {
+  ({ casos: casosE2e, ok: e2eOk } = rodarE2e());
+}
+
+const casos = [...casosBackend, ...casosE2e];
 
 console.log('TAP version 13');
 console.log(`1..${casos.length}`);
@@ -130,11 +198,12 @@ const falhas = casos.filter((c) => c.status === 'fail').length;
 const pulados = casos.filter((c) => c.status === 'skip').length;
 comentar(`${casos.length} teste(s) · ${casos.length - falhas - pulados} ok · ${falhas} falha(s) · ${pulados} pulado(s)`);
 
-if (casos.length === 0) {
+const falhasBackend = casosBackend.filter((c) => c.status === 'fail').length;
+if (casosBackend.length === 0) {
   comentar('nenhum relatório do Surefire: o build não chegou a rodar testes');
   imprimirCauda(saida);
-} else if (falhas > 0) {
+} else if (falhasBackend > 0) {
   imprimirCauda(saida);
 }
 
-process.exit(casos.length > 0 && falhas === 0 && build.status === 0 ? 0 : 1);
+process.exit(casosBackend.length > 0 && falhas === 0 && build.status === 0 && e2eOk ? 0 : 1);
