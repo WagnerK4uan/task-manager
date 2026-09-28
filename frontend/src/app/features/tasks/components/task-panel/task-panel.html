@@ -1,0 +1,126 @@
+<div class="fixed inset-0 z-20 flex justify-end" data-testid="painel">
+  <div class="flex-1 bg-ink/25" (click)="fechar.emit()" aria-hidden="true"></div>
+
+  <section
+    class="flex h-full w-full max-w-md flex-col overflow-y-auto bg-surface p-6 shadow-2xl"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="edicao() ? 'Editar tarefa' : 'Nova tarefa'"
+  >
+    <div class="flex items-baseline justify-between">
+      <h2 class="font-serif text-2xl text-ink">{{ edicao() ? 'Editar tarefa' : 'Nova tarefa' }}</h2>
+      <button
+        type="button"
+        class="text-meta text-ink-muted hover:text-ink hover:underline"
+        (click)="fechar.emit()"
+        data-testid="fechar-painel"
+      >
+        Fechar
+      </button>
+    </div>
+
+    <form class="mt-6 flex flex-col gap-5" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+      <div>
+        <label for="titulo" class="block text-meta font-medium text-ink-muted">Título</label>
+        <input
+          id="titulo"
+          type="text"
+          formControlName="title"
+          data-testid="campo-titulo"
+          class="mt-1 w-full rounded-md border border-rule bg-surface px-3 py-2 text-ink outline-none focus:border-andamento"
+        />
+        @if (erroDe('title')) {
+          <p class="mt-1 text-meta text-alta" role="alert" data-testid="erro-titulo">
+            {{ erroDe('title') }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <label for="descricao" class="block text-meta font-medium text-ink-muted">Descrição</label>
+        <textarea
+          id="descricao"
+          rows="7"
+          formControlName="description"
+          data-testid="campo-descricao"
+          class="mt-1 w-full resize-y rounded-md border border-rule bg-surface px-3 py-2 text-ink outline-none focus:border-andamento"
+        ></textarea>
+        @if (erroDe('description')) {
+          <p class="mt-1 text-meta text-alta" role="alert" data-testid="erro-descricao">
+            {{ erroDe('description') }}
+          </p>
+        }
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="situacao" class="block text-meta font-medium text-ink-muted">Situação</label>
+          <select
+            id="situacao"
+            formControlName="status"
+            data-testid="campo-situacao"
+            class="mt-1 w-full rounded-md border border-rule bg-surface px-3 py-2 text-ink outline-none focus:border-andamento"
+          >
+            <option value="PENDENTE">Pendente</option>
+            <option value="EM_ANDAMENTO">Em andamento</option>
+            <option value="CONCLUIDA">Concluída</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="prioridade" class="block text-meta font-medium text-ink-muted">
+            Prioridade
+          </label>
+          <select
+            id="prioridade"
+            formControlName="priority"
+            data-testid="campo-prioridade"
+            class="mt-1 w-full rounded-md border border-rule bg-surface px-3 py-2 text-ink outline-none focus:border-andamento"
+          >
+            <option value="BAIXA">Baixa</option>
+            <option value="MEDIA">Média</option>
+            <option value="ALTA">Alta</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="prazo" class="block text-meta font-medium text-ink-muted">Prazo</label>
+        <input
+          id="prazo"
+          type="date"
+          formControlName="dueDate"
+          data-testid="campo-prazo"
+          class="mt-1 w-full rounded-md border border-rule bg-surface px-3 py-2 text-ink outline-none focus:border-andamento"
+        />
+        @if (erroDe('dueDate')) {
+          <p class="mt-1 text-meta text-alta" role="alert" data-testid="erro-prazo">
+            {{ erroDe('dueDate') }}
+          </p>
+        }
+      </div>
+
+      <div class="mt-2 flex items-center justify-between">
+        <button
+          type="submit"
+          class="rounded-md bg-andamento px-4 py-2 font-medium text-surface hover:opacity-90 disabled:opacity-60"
+          [disabled]="salvando()"
+          data-testid="salvar"
+        >
+          {{ salvando() ? 'Salvando' : 'Salvar' }}
+        </button>
+
+        @if (edicao()) {
+          <button
+            type="button"
+            class="text-meta text-alta hover:underline"
+            (click)="pedirExclusao()"
+            data-testid="excluir"
+          >
+            Excluir tarefa
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+</div>
