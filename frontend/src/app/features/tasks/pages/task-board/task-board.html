@@ -1,0 +1,93 @@
+<p class="mb-4 text-meta text-ink-muted" data-testid="estado">
+  {{ carregando() ? 'Carregando o quadro' : resumo() }}
+</p>
+
+@if (erro()) {
+  <div role="alert" data-testid="erro" class="mb-5 rounded-lg border border-alta/30 bg-alta-wash p-4">
+    <p class="font-medium text-ink">Não foi possível carregar o quadro.</p>
+    <p class="mt-1 text-meta text-ink-muted">As tarefas voltam assim que a API responder.</p>
+    <button
+      type="button"
+      class="mt-3 text-meta font-medium text-alta hover:underline"
+      (click)="carregar()"
+    >
+      Tentar de novo
+    </button>
+  </div>
+}
+
+@if (aviso()) {
+  <p role="alert" data-testid="aviso" class="mb-5 rounded-lg bg-media-wash p-3 text-meta text-ink">
+    {{ aviso() }}
+  </p>
+}
+
+<div class="grid gap-5 md:grid-cols-3" cdkDropListGroup>
+  @for (coluna of colunas; track coluna.status) {
+    <section
+      class="rounded-xl border p-4"
+      [class]="coluna.moldura"
+      [attr.data-testid]="'coluna-' + coluna.status"
+    >
+      <header class="flex items-center justify-between">
+        <h2 class="font-semibold" [class]="coluna.cabecalho">{{ coluna.titulo }}</h2>
+        <span
+          class="min-w-6 rounded-full px-2 py-0.5 text-center text-meta font-semibold"
+          [class]="coluna.contador"
+          data-testid="contador"
+        >
+          {{ tarefasDa(coluna.status).length }}
+        </span>
+      </header>
+
+      <button
+        type="button"
+        class="mt-3 w-full rounded-md border border-dashed border-ink/20 py-2 text-meta font-medium text-ink-muted hover:border-ink/40 hover:text-ink"
+        [attr.aria-label]="'Nova tarefa em ' + coluna.titulo"
+        (click)="abrirCriacao(coluna.status)"
+        data-testid="criar"
+      >
+        + Nova tarefa
+      </button>
+
+      <div
+        class="mt-3 flex min-h-24 flex-col gap-3"
+        cdkDropList
+        [cdkDropListData]="coluna.status"
+        (cdkDropListDropped)="soltar($event)"
+      >
+        @for (tarefa of tarefasDa(coluna.status); track tarefa.id) {
+          <app-task-card
+            cdkDrag
+            [cdkDragData]="tarefa"
+            [tarefa]="tarefa"
+            [destinoSeguinte]="destinoSeguinte(tarefa.status)"
+            [destinoAnterior]="destinoAnterior(tarefa.status)"
+            [recemMexida]="tarefa.id === recemMexida()"
+            (abrir)="abrirCard($event)"
+            (avancar)="mover($event, 1)"
+            (voltar)="mover($event, -1)"
+          />
+        }
+
+        @if (!carregando() && !erro() && tarefasDa(coluna.status).length === 0) {
+          <p class="rounded-lg border border-dashed border-ink/15 p-4 text-meta text-ink-muted" data-testid="coluna-vazia">
+            Nada aqui ainda. Crie a primeira tarefa desta coluna.
+          </p>
+        }
+      </div>
+    </section>
+  }
+</div>
+
+@if (painelAberto()) {
+  <app-task-panel
+    [tarefa]="tarefaDoPainel()"
+    [situacaoInicial]="situacaoDoPainel()"
+    [salvando]="salvando()"
+    [recusados]="recusados()"
+    (salvar)="salvarPainel($event)"
+    (excluir)="excluirTarefa($event)"
+    (fechar)="fecharPainel()"
+  />
+}
