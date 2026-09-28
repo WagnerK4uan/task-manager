@@ -181,7 +181,7 @@ Decisões:
 
 - **Tailwind v4, e a justificativa não é velocidade.** Para duas telas, CSS à mão
   são umas duzentas linhas — Tailwind não resolve um problema de volume. O que ele
-  resolve é o que aconteceria sem ele: a 008 e a 009 inventariam nomes de classe
+  resolve é o que aconteceria sem ele: a 008 e a 010 inventariam nomes de classe
   em dois lugares diferentes, com duas escalas de espaçamento e nenhum vocabulário
   comum, e no fim haveria um mini design system ad hoc que ninguém projetou.
   Tailwind troca isso por um vocabulário que já existe. O custo é duas
@@ -213,7 +213,7 @@ Decisões:
   esqueleto Angular e o `nginx.conf`), 004-list-tasks (a rota de listagem com os
   filtros que a tela usa), 005-update-task (o `PATCH /status` da troca rápida) e
   006-delete-task (o `DELETE`, e a Q-008 que definiu o 404 que a AC-046 trata).
-- **Bloqueia:** 009-frontend-task-form, que entra pela mesma tela no botão de
+- **Bloqueia:** 010-frontend-task-form, que entra pela mesma tela no botão de
   criar e de editar, e reusa o serviço, os tipos e o vocabulário visual desta
   feature.
 - **Externas:** Docker rodando, para o compose que o E2E exercita.
@@ -222,7 +222,7 @@ Decisões:
 
 ## Fora de escopo
 
-- **Criar e editar tarefa** — é a 009, com o formulário reativo e a validação
+- **Criar e editar tarefa** — é a 010, com o formulário reativo e a validação
   espelhando a da API.
 - **Testes unitários de componente** (`@angular/build:unit-test` com Vitest): a
   prova desta feature é E2E, pelo harness da 007. O `skipTests: true` dos
@@ -241,7 +241,7 @@ Decisões:
 |---|---|---|---|
 | ASM-027 | Sem biblioteca de estado: o estado da tela são `signal` do Angular, e a lista tem uma fonte só — a resposta da API. NgRx resolveria um problema de estado compartilhado entre telas distantes, que não existe com duas telas. | confirmada | Confirmada em 27/09/2026: `signal` bastam; NgRx entra se houver estado compartilhado |
 | ASM-028 | O filtro é espelhado na query string da rota, e a tela lê o filtro de lá. Custa ler e escrever parâmetro de rota; em troca o endereço filtrado é recarregável e compartilhável, e é o que a AC-041 exige. Sem isso, recarregar a página perderia o filtro. | confirmada | Confirmada em 27/09/2026: filtro na query string, recarregável |
-| ASM-029 | O CSS é Tailwind v4, com `tailwindcss` e `@tailwindcss/postcss` em devDependencies do frontend, um `.postcssrc.json` e um `@import` no `styles.css` — a v4 dispensa `tailwind.config`. A justificativa está em "Impacto técnico": não é velocidade, é não deixar a 008 e a 009 inventarem um design system ad hoc em dois lugares. O preço são duas dependências de build e utilitários no template em vez de nomes semânticos de classe. | confirmada | Confirmada em 27/09/2026: Tailwind v4 aprovado pelo mantenedor, com a justificativa registrada |
+| ASM-029 | O CSS é Tailwind v4, com `tailwindcss` e `@tailwindcss/postcss` em devDependencies do frontend, um `.postcssrc.json` e um `@import` no `styles.css` — a v4 dispensa `tailwind.config`. A justificativa está em "Impacto técnico": não é velocidade, é não deixar a 008 e a 010 inventarem um design system ad hoc em dois lugares. O preço são duas dependências de build e utilitários no template em vez de nomes semânticos de classe. | confirmada | Confirmada em 27/09/2026: Tailwind v4 aprovado pelo mantenedor, com a justificativa registrada |
 | ASM-030 | Toda mutação recarrega a lista da API, em vez de atualizar o array local. Custa uma requisição a mais por ação; em troca a tela nunca diverge do servidor, e a AC-044 pode ser provada com um recarregamento. | confirmada | Confirmada em 27/09/2026: recarrega da API; sem atualização otimista |
 | ASM-031 | Nenhum interceptor: a tradução do envelope de erro é função do serviço. `core/interceptors/` nasce vazio e ganha conteúdo na feature que tiver autenticação, retry ou correlação para resolver. | confirmada | Confirmada em 27/09/2026: sem interceptor enquanto não houver problema concreto |
 

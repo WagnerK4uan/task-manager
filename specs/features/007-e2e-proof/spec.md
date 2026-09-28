@@ -1,7 +1,7 @@
 # Spec: 007 — Prova executável da interface
 
 > feature: 007-e2e-proof
-> status: pronta
+> status: auditada
 
 ## Objetivo
 
@@ -151,7 +151,7 @@ Decisões:
 - **Depende de:** 001-project-setup (o `docker-compose.yml`, o `nginx.conf`, o
   `frontend/Dockerfile` e o `scripts/spec-tap.mjs`) e 006-delete-task, por ser o
   estado em que o backend está completo — a AC-039 usa a rota de listagem.
-- **Bloqueia:** 008-frontend-tasks e 009-frontend-task-form. Sem este harness,
+- **Bloqueia:** 008-frontend-tasks e 010-frontend-task-form. Sem este harness,
   nenhum critério de tela pode ser provado e as duas features seriam
   inauditáveis.
 - **Externas:** Docker rodando, para o compose. Os navegadores do Playwright são
@@ -160,7 +160,7 @@ Decisões:
 
 ## Fora de escopo
 
-- **Qualquer tela** — a listagem é a 008 e o formulário é a 009. Esta feature
+- **Qualquer tela** — a listagem é a 008 e o formulário é a 010. Esta feature
   entrega prova, não interface.
 - **Testes unitários de componente** (`@angular/build:unit-test` com Vitest): o
   `skipTests: true` dos schematics no `angular.json` continua como está.
