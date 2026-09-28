@@ -31,6 +31,11 @@ Vistas em uma feature só. Registradas, não confiadas.
 - features: 009-list-null-title
 - última evidência: AC-047 (009-list-null-title, 2026-09-28T01:16:13.508Z)
 
+### L-005 — Verify que sai com código diferente entre execuções tem teste intermitente: ache o caso na saída completa, provoque a corrida de propósito no teste e conserte a aplicação — reexecutar até passar troca prova por sorte.
+- sinal: `VERIFY_FALHOU` · recorrência: 1 feature(s) · penalidades: 0
+- features: 008-frontend-tasks
+- última evidência: AC-041 (008-frontend-tasks, 2026-09-28T02:42:22.223Z)
+
 ## Quarentena — aplicadas e falharam, ignorar
 
 A falha recorreu mesmo com a lição aplicada. Revisão é do usuário.

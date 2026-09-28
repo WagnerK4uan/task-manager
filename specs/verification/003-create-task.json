@@ -1,11 +1,11 @@
 {
   "feature": "003-create-task",
-  "timestamp": "2026-09-28T01:46:00.531Z",
-  "gitRev": "bf3991c",
+  "timestamp": "2026-09-28T03:14:16.261Z",
+  "gitRev": "335fe55",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
-  "testsParsed": 47,
+  "testsParsed": 57,
   "results": {
     "AC-014": {
       "status": "pass",

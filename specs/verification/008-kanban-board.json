@@ -1,0 +1,62 @@
+{
+  "feature": "008-kanban-board",
+  "timestamp": "2026-09-28T03:18:28.765Z",
+  "gitRev": "335fe55",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 57,
+  "results": {
+    "AC-048": {
+      "status": "pass",
+      "testName": "@spec:AC-048 cada tarefa aparece na coluna da sua situação",
+      "method": "tap"
+    },
+    "AC-049": {
+      "status": "pass",
+      "testName": "@spec:AC-049 quadro sem tarefa nenhuma convida a criar",
+      "method": "tap"
+    },
+    "AC-050": {
+      "status": "pass",
+      "testName": "@spec:AC-050 falha da API aparece como mensagem, não como tela branca",
+      "method": "tap"
+    },
+    "AC-051": {
+      "status": "pass",
+      "testName": "@spec:AC-051 arrastar o card para outra coluna muda a situação no servidor",
+      "method": "tap"
+    },
+    "AC-052": {
+      "status": "pass",
+      "testName": "@spec:AC-052 mover pelo botão do card faz o mesmo, sem mouse",
+      "method": "tap"
+    },
+    "AC-053": {
+      "status": "pass",
+      "testName": "@spec:AC-053 o card abre com a descrição inteira e os campos preenchidos",
+      "method": "tap"
+    },
+    "AC-054": {
+      "status": "pass",
+      "testName": "@spec:AC-054 editar e salvar reflete no quadro e sobrevive a recarregar",
+      "method": "tap"
+    },
+    "AC-055": {
+      "status": "pass",
+      "testName": "@spec:AC-055 salvar sem título é recusado com o motivo no campo",
+      "method": "tap"
+    },
+    "AC-056": {
+      "status": "pass",
+      "testName": "@spec:AC-056 excluir pelo painel pede confirmação antes de remover",
+      "method": "tap"
+    },
+    "AC-057": {
+      "status": "pass",
+      "testName": "@spec:AC-057 criar pela coluna nasce naquela situação",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "proximoId": 5,
+  "proximoId": 6,
   "licoes": [
     {
       "id": "L-001",
@@ -100,6 +100,29 @@
       "penalidades": 0,
       "criadaEm": "2026-09-28T01:16:13.508Z",
       "ultimaVez": "2026-09-28T01:16:13.508Z"
+    },
+    {
+      "id": "L-005",
+      "texto": "Verify que sai com código diferente entre execuções tem teste intermitente: ache o caso na saída completa, provoque a corrida de propósito no teste e conserte a aplicação — reexecutar até passar troca prova por sorte.",
+      "chave": "VERIFY_FALHOU::verify que sai com codigo diferente entre execucoes tem teste intermitente ache o caso na saida completa provoque a corrida de proposito no teste e conserte a aplicacao reexecutar ate passar troca prova por sorte",
+      "sinal": "VERIFY_FALHOU",
+      "escopo": null,
+      "status": "candidata",
+      "recorrencia": 1,
+      "features": [
+        "008-frontend-tasks"
+      ],
+      "evidencias": [
+        {
+          "fonte": "AC-041",
+          "feature": "008-frontend-tasks",
+          "quando": "2026-09-28T02:42:22.223Z",
+          "gitRev": "335fe55"
+        }
+      ],
+      "penalidades": 0,
+      "criadaEm": "2026-09-28T02:42:22.223Z",
+      "ultimaVez": "2026-09-28T02:42:22.223Z"
     }
   ]
 }
