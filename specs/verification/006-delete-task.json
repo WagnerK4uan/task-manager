@@ -1,11 +1,11 @@
 {
   "feature": "006-delete-task",
-  "timestamp": "2026-09-27T23:29:44.149Z",
-  "gitRev": "4efffad",
+  "timestamp": "2026-09-28T01:11:02.566Z",
+  "gitRev": "e03a3fe",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
-  "testsParsed": 44,
+  "testsParsed": 47,
   "results": {
     "AC-034": {
       "status": "pass",

@@ -1,11 +1,11 @@
 {
   "feature": "005-update-task",
-  "timestamp": "2026-09-27T23:32:25.667Z",
-  "gitRev": "4efffad",
+  "timestamp": "2026-09-28T01:10:25.202Z",
+  "gitRev": "e03a3fe",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
-  "testsParsed": 44,
+  "testsParsed": 47,
   "results": {
     "AC-027": {
       "status": "pass",

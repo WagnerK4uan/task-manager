@@ -1,0 +1,17 @@
+{
+  "feature": "009-list-null-title",
+  "timestamp": "2026-09-28T01:11:39.881Z",
+  "gitRev": "e03a3fe",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 47,
+  "results": {
+    "AC-047": {
+      "status": "pass",
+      "testName": "@spec:AC-047 a listagem sem filtro de título responde na primeira execução da consulta",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

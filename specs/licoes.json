@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "proximoId": 4,
+  "proximoId": 5,
   "licoes": [
     {
       "id": "L-001",
@@ -77,6 +77,29 @@
       "penalidades": 0,
       "criadaEm": "2026-09-26T20:18:13.156Z",
       "ultimaVez": "2026-09-26T20:18:13.156Z"
+    },
+    {
+      "id": "L-004",
+      "texto": "Teste vermelho só prova defeito quando a mensagem é a do defeito: contexto que não sobe é erro de infraestrutura disfarçado de reprodução, então leia a falha e confirme revertendo e reaplicando a correção.",
+      "chave": "VERIFY_FALHOU::teste vermelho so prova defeito quando a mensagem e a do defeito contexto que nao sobe e erro de infraestrutura disfarcado de reproducao entao leia a falha e confirme revertendo e reaplicando a correcao",
+      "sinal": "VERIFY_FALHOU",
+      "escopo": null,
+      "status": "candidata",
+      "recorrencia": 1,
+      "features": [
+        "009-list-null-title"
+      ],
+      "evidencias": [
+        {
+          "fonte": "AC-047",
+          "feature": "009-list-null-title",
+          "quando": "2026-09-28T01:16:13.508Z",
+          "gitRev": "e03a3fe"
+        }
+      ],
+      "penalidades": 0,
+      "criadaEm": "2026-09-28T01:16:13.508Z",
+      "ultimaVez": "2026-09-28T01:16:13.508Z"
     }
   ]
 }

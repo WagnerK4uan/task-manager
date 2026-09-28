@@ -1,0 +1,22 @@
+{
+  "feature": "007-e2e-proof",
+  "timestamp": "2026-09-28T01:12:17.288Z",
+  "gitRev": "e03a3fe",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 47,
+  "results": {
+    "AC-038": {
+      "status": "pass",
+      "testName": "@spec:AC-038 o nginx serve a aplicação Angular compilada",
+      "method": "tap"
+    },
+    "AC-039": {
+      "status": "pass",
+      "testName": "@spec:AC-039 o /api/ do frontend alcança o backend",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

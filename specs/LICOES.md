@@ -26,6 +26,11 @@ Vistas em uma feature só. Registradas, não confiadas.
 - features: 004-list-tasks
 - última evidência: — (004-list-tasks, 2026-09-26T20:18:13.156Z)
 
+### L-004 — Teste vermelho só prova defeito quando a mensagem é a do defeito: contexto que não sobe é erro de infraestrutura disfarçado de reprodução, então leia a falha e confirme revertendo e reaplicando a correção.
+- sinal: `VERIFY_FALHOU` · recorrência: 1 feature(s) · penalidades: 0
+- features: 009-list-null-title
+- última evidência: AC-047 (009-list-null-title, 2026-09-28T01:16:13.508Z)
+
 ## Quarentena — aplicadas e falharam, ignorar
 
 A falha recorreu mesmo com a lição aplicada. Revisão é do usuário.
