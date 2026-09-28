@@ -55,8 +55,54 @@
   }
 }
 
+@utility painel-entra {
+  animation: deslizar-da-direita 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@utility veu-entra {
+  animation: esmaecer 220ms ease-out;
+}
+
+@utility confirmacao-entra {
+  animation: aproximar 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes deslizar-da-direita {
+  from {
+    transform: translateX(100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes esmaecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes aproximar {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .card-mexido {
+  .card-mexido,
+  .painel-entra,
+  .veu-entra,
+  .confirmacao-entra {
     animation: none;
   }
 }

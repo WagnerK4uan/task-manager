@@ -1,8 +1,8 @@
 <div class="fixed inset-0 z-20 flex justify-end" data-testid="painel">
-  <div class="flex-1 bg-ink/25" (click)="fechar.emit()" aria-hidden="true"></div>
+  <div class="veu-entra flex-1 bg-ink/25" (click)="fechar.emit()" aria-hidden="true"></div>
 
   <section
-    class="flex h-full w-full max-w-md flex-col overflow-y-auto bg-surface p-6 shadow-2xl"
+    class="painel-entra flex h-full w-full max-w-md flex-col overflow-y-auto bg-surface p-6 shadow-2xl"
     role="dialog"
     aria-modal="true"
     [attr.aria-label]="edicao() ? 'Editar tarefa' : 'Nova tarefa'"
