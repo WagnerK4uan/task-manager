@@ -1,4 +1,4 @@
-# Constituição — v2.2.0
+# Constituição — v2.3.0
 
 
 ## P-001 [DEVE] Todo requisito tem prova executável
@@ -57,12 +57,20 @@ escolher `id`, `createdAt` e `updatedAt`, que são do servidor.
 
 ---
 
+## P-006 [DEVE] Componente Angular não faz chamada HTTP
+
+`HttpClient` vive em `core/services`. Componente que chama a API direto mistura
+apresentação com transporte: a tela passa a conhecer rota, envelope de erro e
+formato de resposta, e a mesma tradução de erro aparece copiada em cada lugar que
+pede dado. O serviço é o único ponto que sabe falar com a API, e é por isso que a
+tela pode ser trocada sem tocar no transporte.
+
+- verificação(proibido): `HttpClient` em `frontend/src/app/features/**`
+
+---
+
 ## Fila de princípios
 
-Ainda não estão ativos porque o código que eles guardam não existe. Cada um
-entra como seção `## P-xxx [NÍVEL]` na tarefa indicada, no mesmo commit que
-cria os arquivos do glob.
-
-| Princípio | Verificação | Entra em |
-|---|---|---|
-| P-006 [DEVE] Componente Angular não faz chamada HTTP — HttpClient vive em core/services | proibido `HttpClient` em `frontend/src/app/features/**` | 008-frontend-tasks |
+Nenhum princípio na fila: todos os que o projeto declarou estão ativos. Princípio
+novo entra aqui quando o código que ele guarda ainda não existe, e sai para
+seção no mesmo commit que cria os arquivos do glob.
