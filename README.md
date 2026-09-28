@@ -18,9 +18,15 @@ Angular — que se comunicam apenas por HTTP.
 > `POST /api/tasks` cria, `GET /api/tasks` lista filtrando por título e
 > situação, `GET /api/tasks/{id}` consulta, `PUT /api/tasks/{id}` substitui a
 > tarefa inteira, `PATCH /api/tasks/{id}/status` troca só a situação e
-> `DELETE /api/tasks/{id}` exclui. As seis rotas do CRUD existem; o que falta é
-> a interface. Método que uma rota não aceita é 405 com o header `Allow`, e
-> endereço que nem existe é 404 `RESOURCE_NOT_FOUND`.
+> `DELETE /api/tasks/{id}` exclui. Método que uma rota não aceita é 405 com o
+> header `Allow`, e endereço que nem existe é 404 `RESOURCE_NOT_FOUND`.
+>
+> **A interface é um quadro kanban.** A
+> [`008-kanban-board`](specs/features/008-kanban-board/spec.md) entregou em
+> <http://localhost:4200> três colunas por situação, com o card mudando de
+> coluna por arrasto ou por botão, e um painel lateral que abre a tarefa para
+> ler e editar título, descrição, situação, prioridade e prazo. Criar e excluir
+> também saem do quadro: a aplicação deixou de depender do `curl`.
 
 ## Tecnologias
 
@@ -29,7 +35,7 @@ Angular — que se comunicam apenas por HTTP.
 | Backend | Java 21, Spring Boot 4.1, Spring Data JPA, Hibernate, Bean Validation |
 | Banco | PostgreSQL 16, migrations com Flyway |
 | Documentação da API | springdoc-openapi (Swagger UI) |
-| Frontend | Angular 22 (standalone components), TypeScript |
+| Frontend | Angular 22 (standalone components), TypeScript, Tailwind CSS v4, @angular/cdk |
 | Execução | Docker e Docker Compose, nginx servindo o build do frontend |
 | Testes | JUnit 5, MockMvc, Testcontainers, ArchUnit, Playwright (ponta a ponta) |
 
