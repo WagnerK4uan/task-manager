@@ -18,7 +18,7 @@
 
 ## T-039 — Pacote de E2E com Playwright [concluida]
 - Refs: US-013
-- Arquivos: e2e/package.json, e2e/package-lock.json, e2e/playwright.config.ts, e2e/.gitignore
+- Arquivos: e2e/package.json, e2e/package-lock.json, e2e/tsconfig.json, e2e/playwright.config.ts, e2e/.gitignore
 - Notas: pacote próprio na raiz, com `@playwright/test` e mais nada — fora do `frontend/package.json` pela razão da RNF-28. A config aponta o `baseURL` para o frontend do compose, usa o reporter `junit` com `outputFile` num arquivo de prefixo `TEST-` (é o que o `lerRelatorios` do `spec-tap.mjs` filtra) e roda só Chromium. O `.gitignore` cobre `node_modules/` e o diretório de resultados.
 
 ## T-040 — O spec-tap sobe o compose, roda o E2E e mescla o TAP [concluida]

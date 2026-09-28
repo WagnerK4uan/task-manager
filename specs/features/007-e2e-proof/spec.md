@@ -117,7 +117,8 @@ configuração do próprio ferramental de specs.
 
 | Arquivo | Origem | O que muda |
 |---|---|---|
-| `e2e/package.json` | novo | pacote próprio, com `@playwright/test` e mais nada |
+| `e2e/package.json` | novo | pacote próprio, com `@playwright/test` e `@types/node` |
+| `e2e/tsconfig.json` | novo | diz ao editor como tratar a pasta: alvo, `types: ["node"]` e `skipLibCheck` |
 | `e2e/playwright.config.ts` | novo | `baseURL` do frontend do compose, reporter `junit` num arquivo `TEST-*.xml`, só Chromium |
 | `e2e/.gitignore` | novo | ignora `node_modules/` e o diretório de resultados |
 | `e2e/tests/stack.spec.ts` | novo | os dois testes de fumaça das AC-038 e AC-039 |
@@ -142,6 +143,12 @@ Decisões:
   são sobre o compose, não sobre o harness; que a mesclagem funciona fica provado
   pelo uso — se o TAP não trouxesse o E2E, esses dois critérios voltariam como
   `AC_SEM_PROVA`.
+- **`@types/node` e um `tsconfig.json` no pacote.** Os tipos do próprio Playwright
+  referenciam `Buffer`, `fs`, `stream` e `child_process` do Node; sem as
+  definições e sem um `tsconfig.json`, o editor acusa erro em cada arquivo do
+  `e2e/` — ainda que o teste rode, porque o Playwright transpila sem checar tipo.
+  Prova que o editor marca de vermelho é prova que ninguém mantém. `typescript`
+  **não** entra: o editor traz o seu, e o Playwright não precisa de compilador.
 - **Só Chromium.** Provar a mesma tela em três motores de navegador não é o risco
   deste projeto, e triplicaria o tempo de todo `verify`. Um segundo navegador
   entra quando houver relato de defeito que só aparece nele.
@@ -156,7 +163,8 @@ Decisões:
   inauditáveis.
 - **Externas:** Docker rodando, para o compose. Os navegadores do Playwright são
   baixados uma vez, fora da imagem do frontend.
-- **Bibliotecas:** `@playwright/test`, no pacote `e2e/` e em nenhum outro lugar.
+- **Bibliotecas:** `@playwright/test` e `@types/node`, no pacote `e2e/` e em nenhum
+  outro lugar.
 
 ## Fora de escopo
 
