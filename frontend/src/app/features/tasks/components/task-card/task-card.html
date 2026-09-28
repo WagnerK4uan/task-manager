@@ -1,0 +1,49 @@
+<article
+  class="rounded-lg border border-rule bg-surface p-3 shadow-sm"
+  [class.card-mexido]="recemMexida()"
+  [attr.data-testid]="'card-' + tarefa().id"
+>
+  <button
+    type="button"
+    class="block w-full text-left font-medium text-ink hover:underline"
+    [attr.aria-label]="'Abrir ' + tarefa().title"
+    (click)="abrir.emit(tarefa())"
+    data-testid="abrir-card"
+  >
+    {{ tarefa().title }}
+  </button>
+
+  <div class="mt-3 flex items-center gap-2">
+    <span
+      class="rounded-full px-2 py-0.5 text-meta font-medium"
+      [class]="corDaPrioridade()"
+      data-testid="prioridade"
+    >
+      {{ prioridade() }}
+    </span>
+    <span class="text-meta text-ink-muted" data-testid="prazo">{{ prazo() }}</span>
+
+    <span class="ml-auto flex items-center gap-1">
+    @if (destinoAnterior()) {
+      <button
+        type="button"
+        class="rounded border border-rule px-2 py-0.5 text-meta text-ink-muted hover:border-ink/30 hover:text-ink"
+        [attr.aria-label]="'Voltar ' + tarefa().title + ' para ' + destinoAnterior()"
+        (click)="voltar.emit(tarefa())"
+      >
+        ←
+      </button>
+    }
+    @if (destinoSeguinte()) {
+      <button
+        type="button"
+        class="rounded border border-rule px-2 py-0.5 text-meta text-ink-muted hover:border-ink/30 hover:text-ink"
+        [attr.aria-label]="'Mover ' + tarefa().title + ' para ' + destinoSeguinte()"
+        (click)="avancar.emit(tarefa())"
+      >
+        →
+      </button>
+    }
+    </span>
+  </div>
+</article>
