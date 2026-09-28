@@ -121,9 +121,11 @@ identifique o impacto, proponha a abordagem e só então implemente.
 - **Consultas:** derivadas do Spring Data ou uma `@Query` JPQL legível.
   Specification/Criteria API só se a combinação de filtros crescer a ponto de
   tornar a JPQL ilegível.
-- **Nomes descritivos** e métodos curtos. Comentário só para explicar decisão
-  não óbvia — nunca para narrar o que o código já diz, e nunca para justificar
-  código complicado que podia ser simples.
+- **Nomes descritivos** e métodos curtos. **Código sem comentários:** a
+  justificativa de uma decisão mora na spec da feature, em "Impacto técnico" e
+  nas suposições, onde ela fica versionada junto do requisito que a motivou.
+  Código que precisa de comentário para ser entendido é código para simplificar
+  ou decisão para registrar na spec — não comentário para escrever.
 - **Validação** com Bean Validation nos DTOs de entrada (`@NotBlank`, `@Size`,
   `@NotNull`, `@FutureOrPresent`), ativada por `@Valid` no controller.
 
