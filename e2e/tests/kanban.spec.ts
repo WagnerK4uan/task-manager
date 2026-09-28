@@ -255,14 +255,14 @@ test('@spec:AC-056 excluir pelo painel pede confirmação antes de remover', asy
   await abrirQuadro(page);
   await page.getByRole('button', { name: `Abrir ${titulo}` }).click();
 
-  page.once('dialog', (dialogo) => dialogo.dismiss());
   await page.getByTestId('excluir').click();
+  await page.getByRole('alertdialog').getByTestId('confirmacao-cancelar').click();
 
   await expect(page.getByTestId('painel')).toBeVisible();
   expect((await request.get(`/api/tasks/${id}`)).status()).toBe(200);
 
-  page.once('dialog', (dialogo) => dialogo.accept());
   await page.getByTestId('excluir').click();
+  await page.getByRole('alertdialog').getByTestId('confirmacao-aceitar').click();
 
   await expect(page.getByTestId('painel')).toHaveCount(0);
   await expect(card(page, id)).toHaveCount(0);
