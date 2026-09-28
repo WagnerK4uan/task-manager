@@ -1,7 +1,7 @@
 {
   "feature": "006-delete-task",
-  "timestamp": "2026-09-28T01:11:02.566Z",
-  "gitRev": "e03a3fe",
+  "timestamp": "2026-09-28T01:48:02.216Z",
+  "gitRev": "bf3991c",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
