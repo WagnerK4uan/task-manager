@@ -31,7 +31,7 @@ Angular — que se comunicam apenas por HTTP.
 | Documentação da API | springdoc-openapi (Swagger UI) |
 | Frontend | Angular 22 (standalone components), TypeScript |
 | Execução | Docker e Docker Compose, nginx servindo o build do frontend |
-| Testes | JUnit 5, MockMvc, Testcontainers, ArchUnit |
+| Testes | JUnit 5, MockMvc, Testcontainers, ArchUnit, Playwright (ponta a ponta) |
 
 ## Arquitetura
 
@@ -68,6 +68,7 @@ Para trabalhar em um dos módulos fora do container:
 | Backend | JDK 21 |
 | Frontend | Node.js ≥ 22.22.3 (mínimo do Angular CLI 22) e npm |
 | Testes do backend | Docker rodando — os testes de integração usam Testcontainers |
+| Testes de ponta a ponta | Node.js e Docker; uma vez por máquina, `cd e2e && npm ci && npx playwright install chromium` |
 
 ## Execução com Docker
 
@@ -236,8 +237,7 @@ publica é 404 `RESOURCE_NOT_FOUND`, método não suportado é 405
 
 ## Testes
 
-Os testes são do backend. O frontend não tem suíte automatizada nesta versão —
-decisão consciente de escopo, registrada em [`CLAUDE.md`](CLAUDE.md).
+As regras são provadas no backend:
 
 ```bash
 cd backend && ./mvnw test
@@ -246,6 +246,19 @@ cd backend && ./mvnw test
 Exigem Docker: a persistência e a inicialização são exercitadas contra um
 PostgreSQL real, subido por Testcontainers, para que as migrations rodem como
 em produção. As regras de camada são verificadas com ArchUnit no mesmo build.
+
+O caminho que o backend não alcança — navegador, nginx e o `proxy_pass` de
+`/api/` — é provado de ponta a ponta com Playwright, no pacote
+[`e2e/`](e2e/). Uma vez por máquina, instale o pacote e o navegador; depois
+basta o compose de pé:
+
+```bash
+cd e2e && npm ci && npx playwright install chromium
+cd e2e && npx playwright test
+```
+
+Não há teste unitário de componente Angular nesta versão — decisão consciente
+de escopo, registrada em [`CLAUDE.md`](CLAUDE.md).
 
 ## Especificações e auditoria
 
@@ -260,11 +273,17 @@ node $ONP audit --ci                  # o gate: exit 0 = alinhado
 node $ONP verify 001-project-setup    # roda os testes e grava a prova por critério
 ```
 
-Cada critério de aceite (`AC-xxx`) precisa de um teste cujo `@DisplayName`
-carregue `@spec:AC-xxx`. Quem decide se o critério passou é o test runner,
-nunca uma afirmação em texto: `scripts/spec-tap.mjs` roda o build do backend,
-lê os relatórios do Surefire e imprime TAP, que é o formato que o motor lê.
+Cada critério de aceite (`AC-xxx`) precisa de um teste cujo título carregue
+`@spec:AC-xxx` — o `@DisplayName` no backend, o nome do teste no Playwright.
+Quem decide se o critério passou é o test runner, nunca uma afirmação em texto:
+`scripts/spec-tap.mjs` roda o build do backend, sobe o compose com build, roda o
+E2E, mescla os dois relatórios e imprime TAP, que é o formato que o motor lê.
 Uma feature está pronta quando `audit --ci` sai com código 0.
+
+Por isso **cada `verify` sobe e derruba o compose**: prova que depende de um
+ambiente já de pé aprovaria uma imagem velha. Para pular o E2E em um `verify`
+rápido, `SPEC_TAP_E2E=0` — os critérios de tela voltam sem prova, nunca com um
+PASS que não aconteceu.
 
 Os princípios inegociáveis do projeto estão em
 [`specs/constituicao.md`](specs/constituicao.md); as features, em

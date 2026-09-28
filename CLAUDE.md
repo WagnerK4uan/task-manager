@@ -24,7 +24,7 @@ A regra que governa todas as decisões abaixo:
 | Frontend | Angular (standalone components), TypeScript, Reactive Forms |
 | Build | Maven Wrapper (backend), npm (frontend) |
 | Execução | Docker e Docker Compose |
-| Testes | JUnit 5, Mockito, MockMvc, Testcontainers, ArchUnit |
+| Testes | JUnit 5, Mockito, MockMvc, Testcontainers, ArchUnit, Playwright (ponta a ponta) |
 
 O Spring Boot 4 renomeou starters: use `spring-boot-starter-webmvc` (não
 `-web`) e `spring-boot-starter-flyway`. O antigo `spring-boot-starter-test` foi
@@ -81,11 +81,14 @@ memória, sem framework de mock.
 │       ├── application/{dto,mapper,service}
 │       ├── infrastructure/{persistence,configuration}
 │       └── presentation/{controller,handler}
-└── frontend/
-    └── src/app/
-        ├── core/{services,interceptors}
-        ├── features/tasks/{pages,components,models}
-        └── shared/
+├── frontend/
+│   └── src/app/
+│       ├── core/{services,interceptors}
+│       ├── features/tasks/{pages,components,models}
+│       └── shared/
+└── e2e/                       # Playwright contra o compose (prova da interface)
+    ├── playwright.config.ts
+    └── tests/
 ```
 
 ## Regras de desenvolvimento
@@ -225,8 +228,10 @@ no código, nunca enfraquecendo o princípio.
 
 ## Testes
 
-- **Escopo:** backend. O frontend não tem testes automatizados nesta versão —
-  decisão consciente de escopo, registrada aqui para não parecer esquecimento.
+- **Escopo:** as regras são provadas no backend; a interface é provada de ponta
+  a ponta, contra o compose. O que não existe é teste unitário de componente
+  Angular — decisão consciente de escopo, registrada aqui para não parecer
+  esquecimento.
 - **Service:** unitário, com um duplo em memória da porta `TaskRepository`.
   Sem subir contexto Spring.
 - **Controller:** `@WebMvcTest` com o service mockado — valida status, corpo e
@@ -235,6 +240,12 @@ no código, nunca enfraquecendo o princípio.
   as migrations Flyway sejam exercitadas exatamente como em produção.
 - **Camadas:** ArchUnit. A regra de dependência entre camadas é um teste que
   falha o build, não um acordo verbal.
+- **Ponta a ponta:** Playwright, no pacote `e2e/` da raiz, contra as imagens do
+  compose — é o único teste que atravessa navegador, nginx e `proxy_pass`. O
+  título do teste carrega a etiqueta `@spec:AC-xxx`, como o `@DisplayName` do
+  backend, e o `scripts/spec-tap.mjs` mescla os dois relatórios no mesmo TAP.
+  `SPEC_TAP_E2E=0` pula o E2E: os critérios de tela voltam sem prova, nunca com
+  um PASS que não aconteceu.
 - Cada critério de aceite tem pelo menos um teste, anotado assim:
 
 ```java
@@ -285,6 +296,14 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
 # frontend
 cd frontend && npm start
 
+# ponta a ponta (uma vez por máquina: pacote e navegador)
+cd e2e && npm ci && npx playwright install chromium
+cd e2e && npx playwright test         # exige o compose de pé
+
+# cada verify sobe o compose, roda o E2E e derruba o compose;
+# para pular o E2E (os critérios de tela voltam sem prova):
+SPEC_TAP_E2E=0 node $ONP verify 004-list-tasks
+
 # ambiente completo
 docker compose up --build
 ```
@@ -295,7 +314,7 @@ docker compose up --build
 |---|---|---|
 | D-1 | Specs auditadas mecanicamente (`onp-spec`) em vez de markdown solto | especificação sem gate vira ficção assim que o código evolui; aqui o desalinhamento tem código de saída |
 | D-2 | Porta no domínio + adaptador em infrastructure | inverte a dependência de verdade e torna o service testável sem framework de mock, ao custo de duas classes |
-| D-3 | Testes só no backend | é onde estão as regras; cobrir o frontend exigiria infraestrutura de teste que não paga o próprio custo nesta versão |
+| D-3 | Regras provadas no backend; interface provada de ponta a ponta contra o compose (Playwright) | até a 006 não havia tela, e montar infraestrutura de teste dentro do Angular não pagava o próprio custo; a partir da 007 o custo mudou de lado — não provar a tela é entregar metade do sistema sem gate, e o E2E prova o caminho navegador → nginx → API sem teste unitário de componente |
 | D-4 | Prova via TAP gerado do Surefire | o motor precisa saber critério a critério o que passou; usar só o código de saída global provaria demais |
 | D-5 | `Instant` em UTC para auditoria, `LocalDate` para vencimento | vencimento é um dia civil, não um instante; misturar os dois tipos é origem clássica de erro de fuso |
 | D-6 | Enum como texto no banco | reordenar o enum no código não pode corromper dados |
