@@ -1,6 +1,6 @@
-# Tasks: 008 — Listagem de tarefas na interface
+# Tasks: 008 — Quadro kanban de tarefas
 
-> feature: 008-frontend-tasks
+> feature: 008-kanban-board
 
 <!--
   T-xxx = tarefa · Refs: histórias/critérios que a tarefa atende
@@ -8,58 +8,67 @@
   decide o que pode rodar em paralelo e o que o audit considera código órfão.
   Uma tarefa = um commit. Status: pendente | em-andamento | concluida
 
-  Códigos de rastreio nunca são renumerados nem reaproveitados: a 007 terminou
-  em T-042, então esta feature começa em T-043.
+  A primeira tentativa desta feature entregou uma lista, recusada pelo
+  mantenedor. Os códigos dela — AC-040 a AC-046 e T-043 a T-049 — ficam vagos
+  para sempre: código de rastreio não se reaproveita. Esta feature começa em
+  T-052, depois do T-051 da 009.
 
-  Só começa depois da 007: sem o harness, nenhum critério daqui tem como ser
-  provado. A ordem é de dentro para fora — tipos, serviço, casca, componente,
-  página, ações — e a prova vem na T-049.
+  A ordem é de dentro para fora: tipos e serviço, paleta e casca, card, quadro,
+  arrasto, botão, painel, criação — e a prova vem na T-061.
 
   Todo arquivo criado sob frontend/src/app/ tem que aparecer em algum Arquivos:
   aqui. O ARQUIVO_ORFAO é aviso no audit e erro no audit --ci.
 -->
 
-## T-043 — Tipos da tarefa, serviço HTTP e o princípio P-006 [pendente]
-
-- Refs: US-014, US-015, AC-040, AC-043, AC-046
+## T-052 — Tipos, serviço com criar e substituir, e o princípio P-006 [concluida]
+- Refs: US-017, US-019, US-020, AC-050, AC-055
 - Arquivos: frontend/src/app/features/tasks/models/task.ts, frontend/src/app/core/services/task-api.ts, specs/constituicao.md
-- Notas: os tipos espelham os DTOs da API (`Task`, `TaskStatus`, `TaskPriority` e o envelope de erro com `timestamp`, `status`, `error`, `message`, `path`). O `task-api.ts` é o **único** arquivo com `HttpClient`: `listar(titulo, status)`, `alterarStatus(id, status)`, `excluir(id)`, e a tradução do envelope de erro numa função — sem interceptor (ASM-031). A constituição entra nesta tarefa porque o princípio tem que chegar no mesmo commit que cria os arquivos do glob `frontend/src/app/features/**`, e este é esse commit: o P-006 sai da fila e vira seção.
+- Notas: os tipos espelham os DTOs da API, incluindo o `fields` do envelope de erro, que é o que a AC-055 mostra campo a campo. O `task-api.ts` é o **único** arquivo com `HttpClient` e ganha `criar` e `substituir` além de `listar`, `alterarStatus` e `excluir`; a falha traduzida carrega status, código e os campos recusados. A constituição entra aqui porque o P-006 tem que estar ativo no mesmo commit que cria os arquivos do glob `frontend/src/app/features/**`.
 
-## T-044 — Tailwind e a casca da aplicação [pendente]
-
-- Refs: US-014
+## T-053 — Paleta por situação, Tailwind e a casca [concluida]
+- Refs: US-017
 - Arquivos: frontend/package.json, frontend/.postcssrc.json, frontend/src/styles.css, frontend/src/app/app.config.ts, frontend/src/app/app.routes.ts, frontend/src/app/app.html
-- Notas: `tailwindcss` e `@tailwindcss/postcss` em devDependencies, um `.postcssrc.json` com o plugin e `@import "tailwindcss";` no `styles.css` — a v4 dispensa `tailwind.config`, e o `@angular/build` já procura config de PostCSS (ASM-029). Junto vêm o `provideHttpClient` no `app.config.ts`, a rota da listagem com o redirecionamento da raiz no `app.routes.ts` e o cabeçalho no `app.html`. É um commit só porque o Tailwind sem a casca não se vê e a casca sem o Tailwind teria estilo para jogar fora. Altera os arquivos que a T-009 da 001 criou.
+- Notas: `tailwindcss` e `@tailwindcss/postcss` em devDependencies, `.postcssrc.json` com o plugin e `@import "tailwindcss"` no `styles.css` — a v4 dispensa `tailwind.config`. Os tokens `@theme` declaram a cor de cada situação (âmbar, índigo, verde) e de cada prioridade, mais papel, tinta e fio. Junto vêm `provideHttpClient`, a rota do quadro com o redirecionamento da raiz e o cabeçalho.
 
-## T-045 — Linha da tarefa [pendente]
+## T-054 — Card da tarefa [concluida]
+- Refs: US-017, AC-048
+- Arquivos: frontend/src/app/features/tasks/components/task-card/task-card.ts, frontend/src/app/features/tasks/components/task-card/task-card.html
+- Notas: componente de apresentação puro — recebe uma `Task` e emite o que o quadro executa. Nenhum `HttpClient` aqui, que é o que o P-006 garante por gate. Mostra título, etiqueta de prioridade colorida e prazo em `dd/mm/aaaa`, com ausência explícita quando não há prazo. A tradução dos enums para português vive nesta camada.
 
-- Refs: US-014, AC-040
-- Arquivos: frontend/src/app/features/tasks/components/task-row/task-row.ts, frontend/src/app/features/tasks/components/task-row/task-row.html
-- Notas: componente de apresentação puro: recebe uma `Task` e emite as ações de concluir e excluir. Nenhum `HttpClient` aqui — é o que o P-006 passa a garantir por gate. A tradução dos enums para português e a formatação do prazo como `dd/mm/aaaa` vivem nesta camada, num mapa simples. Sem arquivo de estilo: os utilitários vão no template, e estilo que não couber em utilitário vai nomeado no `styles.css`.
+## T-055 — Quadro de três colunas [concluida]
+- Refs: US-017, AC-048, AC-049, AC-050
+- Arquivos: frontend/src/app/features/tasks/pages/task-board/task-board.ts, frontend/src/app/features/tasks/pages/task-board/task-board.html
+- Notas: estado em `signal` (ASM-036). Uma chamada de listagem sem filtro alimenta as três colunas, agrupadas por situação na apresentação; o contador de cada coluna é a quantidade de cards dela. Coluna sem card mostra convite, que não é erro (AC-049); falha da API é mensagem legível, sem status cru (AC-050). Em largura de telefone as colunas empilham.
 
-## T-046 — Página de listagem com filtros na query string [pendente]
+## T-056 — Arrastar o card entre colunas [concluida]
+- Refs: US-018, AC-051
+- Arquivos: frontend/package.json, frontend/src/app/features/tasks/pages/task-board/task-board.ts, frontend/src/app/features/tasks/pages/task-board/task-board.html, frontend/src/app/features/tasks/components/task-card/task-card.html
+- Notas: `@angular/cdk` em dependências (ASM-037), com `cdkDropListGroup`, `cdkDropList` por coluna e `cdkDrag` no card. Soltar numa coluna diferente chama `PATCH /status` e recarrega o quadro; soltar na mesma coluna não chama nada. Falha do servidor devolve o card para a origem, com aviso — o quadro nunca mostra estado que o banco não tem (RNF-40).
 
-- Refs: US-014, AC-040, AC-041, AC-042, AC-043
-- Arquivos: frontend/src/app/features/tasks/pages/task-list/task-list.ts, frontend/src/app/features/tasks/pages/task-list/task-list.html
-- Notas: estado em `signal` (ASM-027), sem biblioteca de estado. Os dois filtros são lidos e escritos na query string da rota, para que recarregar a página preserve o filtro (ASM-028, AC-041). Lista vazia é estado vazio e não erro (AC-042); falha da API é mensagem legível, sem status cru (AC-043). Os controles levam rótulo e `data-testid`, porque a T-049 não pode selecionar por classe (RNF-35). Depende de T-043, T-044 e T-045.
+## T-057 — Mover o card pelo botão [concluida]
+- Refs: US-018, AC-052
+- Arquivos: frontend/src/app/features/tasks/components/task-card/task-card.ts, frontend/src/app/features/tasks/components/task-card/task-card.html, frontend/src/app/features/tasks/pages/task-board/task-board.ts, frontend/src/app/features/tasks/pages/task-board/task-board.html
+- Notas: avançar e voltar de coluna por botão, com rótulo acessível que diz para onde vai, alcançável por teclado (RNF-43). É a mesma chamada do arrasto — dois caminhos, uma operação. O botão de avançar some na última coluna e o de voltar na primeira.
 
-## T-047 — Concluir e excluir a partir da lista [pendente]
+## T-058 — Painel do card: ler, editar e excluir [concluida]
+- Refs: US-019, AC-053, AC-054, AC-055, AC-056
+- Arquivos: frontend/src/app/features/tasks/components/task-panel/task-panel.ts, frontend/src/app/features/tasks/components/task-panel/task-panel.html, frontend/src/app/features/tasks/pages/task-board/task-board.ts, frontend/src/app/features/tasks/pages/task-board/task-board.html
+- Notas: painel lateral com o quadro visível atrás, aberto ao acionar o card. Formulário reativo com título, descrição, situação, prioridade e prazo; salvar é `PUT` com a tarefa inteira. A validação vem do backend e é exibida por campo, a partir do `fields` do envelope (ASM-039) — nada de regra duplicada no TypeScript. Excluir pede confirmação e fecha o painel. Fecha por `Esc` e pelo botão, devolvendo o foco ao card.
 
-- Refs: US-015, AC-044, AC-045, AC-046
-- Arquivos: frontend/src/app/features/tasks/pages/task-list/task-list.ts, frontend/src/app/features/tasks/pages/task-list/task-list.html, frontend/src/app/features/tasks/components/task-row/task-row.html
-- Notas: as duas ações chamam o serviço e **recarregam a lista** da API em vez de remendar o array local (ASM-030). A exclusão pede confirmação antes de chamar a API (AC-045) — é a interface que pergunta, como a 006 fixou. O 404 da exclusão é tratado como "já não está lá", sem mensagem de erro (AC-046, contrapartida da Q-008 da 006). Altera arquivos da T-045 e da T-046.
+## T-059 — Criar tarefa pela coluna [concluida]
+- Refs: US-020, AC-057
+- Arquivos: frontend/src/app/features/tasks/components/task-panel/task-panel.ts, frontend/src/app/features/tasks/components/task-panel/task-panel.html, frontend/src/app/features/tasks/pages/task-board/task-board.ts, frontend/src/app/features/tasks/pages/task-board/task-board.html
+- Notas: cada coluna tem um botão de criar que abre o mesmo painel, em branco e já com a situação daquela coluna; salvar é `POST`. O painel sabe se tem id — é o que distingue criar de editar, e é por isso que não existem dois componentes.
 
-## T-048 — Prova E2E da listagem [pendente]
+## T-060 — Prova de ponta a ponta do quadro [concluida]
+- Refs: AC-048, AC-049, AC-050, AC-051, AC-052, AC-053, AC-054, AC-055, AC-056, AC-057
+- Arquivos: e2e/tests/kanban.spec.ts
+- Notas: dez testes, um por critério, com o título começando em `@spec:AC-xxx`. Seleção por papel, texto acessível ou `data-testid`, nunca por classe (RNF-41). Cada teste cria os próprios dados pela API, com títulos únicos, e não assume banco vazio nem conta o total de cards do quadro (ASM-026 da 007) — o contador da coluna é comparado com os cards que aquela coluna mostra, nunca com um número fixo. As AC-049 e AC-050 interceptam a listagem no navegador, devolvendo lista vazia e erro. O arrasto da AC-051 é dirigido por eventos de mouse em passos (ASM-040), mirando uma âncora estável no topo da coluna de destino — o centro da coluna sai da tela conforme o quadro cresce. Cada teste apaga pela API as tarefas que criou, para o quadro não crescer sem limite entre execuções. O verify é o último passo, depois dos commits e dos saves.
 
-- Refs: AC-040, AC-041, AC-042, AC-043, AC-044, AC-045, AC-046
-- Arquivos: e2e/tests/task-list.spec.ts
-- Notas: sete testes, um por critério, com o título começando em `@spec:AC-xxx` — é o título que o `spec-tap.mjs` lê como nome do caso. Seleção por papel, texto acessível ou `data-testid`, nunca por classe (RNF-35). Cada teste cria os próprios dados pela API, com títulos únicos, e não assume banco vazio nem conta o total de linhas (ASM-026 da 007). A AC-043 é provada interceptando a rota no navegador para devolver 500 (Q-011), sem derrubar o backend. A AC-046 exclui a tarefa pela API antes de acionar a exclusão na tela. A AC-045 exercita a confirmação recusada e a aceita, no mesmo teste, porque o critério tem os dois lados. O verify é o último passo, depois dos commits e dos saves (L-003).
-
-## T-049 — README com a tela publicada [pendente]
-
-- Refs: US-014, US-015
+## T-061 — README com o quadro publicado [concluida]
+- Refs: US-017, US-018, US-019, US-020
 - Arquivos: README.md
-- Notas: o bloco de estado atual passa a dizer que o sistema tem interface, com a listagem descrita e o que ela faz; a tabela de stack ganha Tailwind. A exceção ao D-3 e o `e2e/` já foram documentados pela T-042 da 007 — esta tarefa é só a tela. Tarefa de documentação, separada porque não altera código da feature.
+- Notas: o bloco de estado atual passa a dizer que o sistema tem quadro kanban, com o que ele faz; a tabela de stack ganha Tailwind e `@angular/cdk`. Tarefa de documentação, separada porque não altera código da feature.
 
 <!--
   Antes do audit --ci: rodar o verify de TODAS as features, não só desta —

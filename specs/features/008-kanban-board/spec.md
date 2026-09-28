@@ -1,38 +1,43 @@
-# Spec: 008 — Listagem de tarefas na interface
+# Spec: 008 — Quadro kanban de tarefas
 
-> feature: 008-frontend-tasks
-> status: pronta
+> feature: 008-kanban-board
+> status: auditada
 
 ## Objetivo
 
-Entregar a primeira tela do sistema: a lista de tarefas, com os filtros de título
-e situação, a troca rápida de situação e a exclusão. É a feature que transforma as
-seis rotas do backend em algo que uma pessoa consegue usar.
+Entregar a interface do sistema como um quadro kanban: três colunas por
+situação, cards que se movem entre elas por arrasto ou por botão, e um painel
+que abre o card para ler e editar todos os campos — inclusive a descrição, que
+até aqui existia na API e não aparecia em lugar nenhum. Criar tarefa também
+passa a ser trabalho da tela, e não mais só do `curl`.
 
 ## Contexto
 
-O backend fechou o CRUD na 006, com 37 critérios provados, e a 007 entregou o
-harness que torna uma tela auditável — Playwright contra o compose, com o
-resultado no mesmo TAP que o motor lê. Esta feature é a primeira que usa esse
-harness para provar comportamento de produto.
+O backend fechou o CRUD na 006 e a 007 entregou o harness que torna uma tela
+auditável. A primeira versão desta feature entregou uma **lista** — e a lista
+foi recusada pelo mantenedor em 28/09/2026: o modelo mental do produto é
+quadro, não linha, e a tela precisava de cor. A implementação da lista foi
+descartada antes de entrar no histórico; a spec dela existe no commit `e03a3fe`
+e é substituída por esta.
 
-O que existe de frontend é o esqueleto da 001: `app.routes.ts` com um array
-vazio, `app.config.ts` sem `provideHttpClient`, `styles.css` com o comentário de
-exemplo do CLI. Nenhum componente, nenhum serviço, nenhum tipo. A 007 provou que
-o nginx serve esse esqueleto e que o `/api/` alcança o backend (AC-038 e AC-039),
-então o caminho está livre: o que falta é a tela.
+O que sobreviveu da tentativa anterior, porque o quadro precisa exatamente dos
+mesmos arquivos: os tipos da tarefa, o serviço com `HttpClient`, a configuração
+do Tailwind e o princípio **P-006** (componente não fala HTTP), que saiu da
+fila da constituição. O que morreu junto com a lista: a tela, os testes dela e
+os critérios AC-040 a AC-046. Códigos de rastreio não se reaproveitam — esta
+feature começa em AC-048 e T-052, e os números da lista ficam vagos para
+sempre.
 
-**A tela não inventa regra nenhuma.** A ordem da lista é a que a AC-021 já provou
-na API, os filtros são os que a AC-022 provou, o estado vazio é o 200 com array
-vazio da AC-023. A interface apresenta e pede; quem decide continua sendo o
-backend. Isso importa para o tamanho desta feature: ela é grande em arquivos e
-pequena em decisões.
+**O quadro muda o que a tela pede da API, não a API.** Mover um card é o
+`PATCH /api/tasks/{id}/status` que a 005 publicou; salvar o painel é o
+`PUT /api/tasks/{id}`; criar é o `POST /api/tasks` da 003; excluir é o
+`DELETE` da 006. Nenhuma rota nova, nenhum campo novo — a 004 inclusive já
+devolve tudo o que o card mostra.
 
-**Um laço que vem da 006.** A Q-008 fixou que a segunda exclusão do mesmo
-identificador responde 404, e registrou que o preço disso é a interface tratar
-esse 404 como "já não está lá" em vez de erro. A AC-046 é essa contrapartida — o
-primeiro caso em que uma decisão de API tomada duas features atrás vira
-comportamento observável de tela.
+**O filtro sai de cena.** A lista tinha busca por título e por situação; o
+quadro mostra as três situações lado a lado, o que torna o filtro de situação
+redundante, e a busca por título volta quando houver volume que a justifique
+(ASM-038).
 
 ## Requisitos funcionais
 
@@ -40,213 +45,239 @@ Expressos como histórias e critérios de aceite abaixo.
 
 ## Histórias
 
-### US-014 — Ver e estreitar a lista de tarefas
+### US-017 — Ver o trabalho distribuído em colunas
 
-Como pessoa que usa o sistema, quero ver minhas tarefas numa tela e estreitar a
-lista por título ou situação, para que eu encontre o que preciso fazer sem ler a
-lista inteira e sem montar requisição HTTP na mão.
+Como pessoa que usa o sistema, quero ver minhas tarefas em colunas por
+situação, para entender de relance o que está parado, o que está andando e o
+que já saiu da frente.
 
-#### AC-040 — A tela mostra as tarefas que a API devolve, na ordem da API
+#### AC-048 — Cada tarefa aparece na coluna da sua situação
 
-- **Dado** três tarefas criadas pela API, em momentos diferentes
-- **Quando** a listagem é aberta no navegador
-- **Então** as três aparecem na tela, da mais recente para a mais antiga — a
-  mesma ordem que a AC-021 provou na API —, cada uma com título, situação,
-  prioridade e prazo visíveis, e a situação e a prioridade em português
+- **Dado** três tarefas criadas pela API, uma pendente, uma em andamento e uma
+  concluída
+- **Quando** o quadro é aberto
+- **Então** cada uma aparece dentro da coluna da sua situação, com título,
+  prioridade e prazo visíveis, e o número no topo de cada coluna é igual à
+  quantidade de cards que aquela coluna mostra
 
-#### AC-041 — Os dois filtros estreitam a lista e sobrevivem a um recarregamento
+#### AC-049 — Quadro sem tarefa nenhuma convida a criar, não fica mudo
 
-- **Dado** as tarefas "Escrever a spec" (concluída) e "Revisar o PR" (pendente)
-- **Quando** o filtro de título recebe `escrever`, e depois a situação recebe
-  `PENDENTE`
-- **Então** a tela mostra só o que casa com o filtro em cada passo, o filtro
-  aparece na query string do endereço, e recarregar a página nesse endereço
-  devolve a mesma lista filtrada (ASM-028)
+- **Dado** uma API que responde a listagem com nenhuma tarefa
+- **Quando** o quadro é aberto
+- **Então** cada uma das três colunas mostra um convite para criar a primeira
+  tarefa ali, sem nenhuma mensagem de erro, e o botão de criar continua
+  disponível em cada coluna
 
-#### AC-042 — Filtro que não casa nada mostra estado vazio, não erro
+#### AC-050 — Falha da API aparece como mensagem, não como tela branca
 
-- **Dado** um filtro de título que nenhuma tarefa satisfaz
-- **Quando** ele é aplicado
-- **Então** a tela mostra uma mensagem de lista vazia, sem nenhuma linha de
-  tarefa e sem mensagem de erro — porque 200 com array vazio é resposta de
-  sucesso, como a AC-023 fixou
+- **Dado** a API respondendo erro à listagem
+- **Quando** o quadro é aberto
+- **Então** a tela mostra uma mensagem de erro legível, sem status cru nem
+  stack trace, e continua navegável
 
-#### AC-043 — Falha da API aparece como mensagem, não como tela branca
+### US-018 — Mover a tarefa pelo quadro
 
-- **Dado** a API respondendo erro a uma listagem
-- **Quando** a tela é aberta
-- **Então** ela mostra uma mensagem de erro legível, sem nenhum código de status
-  cru nem stack trace, e continua navegável — nunca uma tela em branco ou um erro
-  só no console
+Como pessoa que usa o sistema, quero arrastar o card para outra coluna — ou
+mover por botão quando não tenho mouse —, para que mudar a situação seja o
+gesto mais barato da tela.
 
-### US-015 — Agir sobre uma tarefa a partir da lista
+#### AC-051 — Arrastar o card para outra coluna muda a situação no servidor
 
-Como pessoa que usa o sistema, quero concluir ou excluir uma tarefa direto da
-lista, para que a ação mais comum não exija abrir um formulário.
+- **Dado** uma tarefa pendente no quadro
+- **Quando** o card dela é arrastado para a coluna "Em andamento"
+- **Então** o card passa a viver naquela coluna e **recarregar a página o
+  mantém lá** — a mudança foi para o servidor, não só para a tela
 
-#### AC-044 — Concluir a partir da lista troca a situação e a tela reflete
+#### AC-052 — Mover pelo botão do card faz o mesmo, sem mouse
 
-- **Dado** uma tarefa pendente na tela
-- **Quando** a ação de concluir é acionada nela
-- **Então** a linha passa a mostrar a situação concluída, e recarregar a página
-  mostra a situação nova — a troca foi para o servidor pelo `PATCH`, não só para
-  a tela (ASM-030)
+- **Dado** uma tarefa pendente no quadro
+- **Quando** a ação de avançar do card é acionada pelo teclado
+- **Então** o card passa para a coluna seguinte e recarregar a página o mantém
+  lá — o mesmo resultado do arrasto, pelo mesmo caminho no servidor
 
-#### AC-045 — Excluir pede confirmação antes de remover
+### US-019 — Abrir o card para ler e editar
 
-- **Dado** uma tarefa na tela
-- **Quando** a ação de excluir é acionada e a confirmação é recusada
-- **Então** nada acontece: a tarefa continua na tela e continua na API
-- **E quando** a ação é acionada de novo e a confirmação é aceita
-- **Então** a tarefa sai da tela e uma consulta à API responde 404 — a
-  confirmação é da interface, como a 006 registrou
+Como pessoa que usa o sistema, quero abrir o card e ver a descrição inteira,
+podendo aumentá-la, encurtá-la ou corrigir qualquer campo, para que a tarefa
+carregue o contexto de que ela precisa.
 
-#### AC-046 — Excluir o que já não existe não vira erro na cara de quem usa
+#### AC-053 — O card abre com a descrição inteira e os campos preenchidos
 
-- **Dado** uma tarefa visível na tela que foi excluída por fora, pela API
-- **Quando** a exclusão é acionada nela e confirmada
-- **Então** a tarefa desaparece da lista sem mensagem de erro — o 404 da rota de
-  exclusão é tratado como "já não está lá", que é a contrapartida que a Q-008 da
-  006 deixou para a interface
+- **Dado** uma tarefa com descrição longa, prioridade alta e prazo
+- **Quando** o card dela é acionado no quadro
+- **Então** abre um painel com a descrição inteira num campo editável, e com
+  título, situação, prioridade e prazo preenchidos com o que a API devolveu
+
+#### AC-054 — Editar e salvar reflete no quadro e sobrevive a recarregar
+
+- **Dado** o painel aberto numa tarefa
+- **Quando** a descrição é reescrita, a prioridade é trocada e o painel é salvo
+- **Então** o painel fecha, o card no quadro mostra a prioridade nova, e
+  reabrir o card depois de recarregar a página mostra a descrição nova
+
+#### AC-055 — Salvar sem título é recusado com o motivo no campo
+
+- **Dado** o painel aberto numa tarefa
+- **Quando** o título é apagado e o painel é salvo
+- **Então** a tela mostra a mensagem de que o título é obrigatório junto do
+  campo, o painel continua aberto, e recarregar a página mostra a tarefa com o
+  título antigo — nada foi gravado
+
+#### AC-056 — Excluir pelo painel pede confirmação antes de remover
+
+- **Dado** o painel aberto numa tarefa
+- **Quando** a exclusão é acionada e a confirmação é recusada
+- **Então** a tarefa continua no quadro e continua na API
+- **E quando** a exclusão é acionada de novo e a confirmação é aceita
+- **Então** o painel fecha, o card some do quadro e uma consulta à API responde
+  404
+
+### US-020 — Criar a tarefa já na coluna certa
+
+Como pessoa que usa o sistema, quero criar a tarefa a partir da coluna onde ela
+nasce, para não precisar criar e depois mover — nem abrir um terminal.
+
+#### AC-057 — Criar pela coluna nasce naquela situação
+
+- **Dado** o quadro aberto
+- **Quando** a criação é acionada no topo da coluna "Em andamento" e o painel é
+  preenchido com título e prioridade e salvo
+- **Então** o card aparece na coluna "Em andamento", e consultar a API mostra a
+  tarefa gravada com aquela situação
 
 ## Requisitos não funcionais
 
-- **RNF-32** — O princípio P-006 sai da fila da constituição nesta feature, no
-  mesmo commit que cria `frontend/src/app/features/**`: `HttpClient` só em
-  `core/services`. Componente que fala HTTP direto quebra o gate.
-- **RNF-33** — Sem biblioteca de estado. O estado da tela são `signal` do próprio
-  Angular; NgRx e afins entram quando houver estado compartilhado que os
-  justifique (ASM-027).
-- **RNF-34** — O CSS é Tailwind v4, e a configuração é a mínima: sem
-  `tailwind.config`, que a v4 dispensa. O `@angular/build` já procura config de
-  PostCSS, então a integração é um `.postcssrc.json` e um `@import` (ASM-029).
-- **RNF-35** — Os testes de tela selecionam por papel, texto acessível ou
-  `data-testid` — nunca por classe de CSS. Com utilitários, classe deixou de
-  identificar qualquer coisa.
-- **RNF-36** — Nenhuma mudança no backend. Nenhuma rota nova, nenhum DTO novo,
-  nenhuma migration: a tela consome o que a 003, a 004 e a 006 já publicaram e
-  provaram.
+- **RNF-37** — O princípio P-006 continua valendo e continua sendo gate:
+  `HttpClient` só em `core/services`. Card, coluna e painel não falam HTTP.
+- **RNF-38** — Sem biblioteca de estado. O estado do quadro são `signal` do
+  Angular; o quadro tem uma fonte só, que é a resposta da API (ASM-036).
+- **RNF-39** — O arrasto usa `@angular/cdk`, do próprio time do Angular, e
+  **não** uma biblioteca de terceiros. É a única dependência nova (ASM-037).
+- **RNF-40** — Toda ação que muda dado vai ao servidor e o quadro recarrega da
+  API. Nada de atualização otimista: o card só muda de coluna depois que o
+  servidor confirmou (ASM-036).
+- **RNF-41** — Os testes selecionam por papel, texto acessível ou
+  `data-testid`, nunca por classe de CSS.
+- **RNF-42** — Nenhuma mudança no backend. Nenhuma rota, DTO ou migration: o
+  quadro consome o que a 003, a 004, a 005 e a 006 já publicaram e provaram.
+- **RNF-43** — Toda ação do quadro tem caminho por teclado: mover, abrir,
+  salvar, criar e excluir. Arrastar é atalho, nunca o único jeito.
 
 ## Regras de negócio
 
-- **A tela não inventa regra.** Ordem, filtros e validação são os da API; a
-  interface apresenta e pede.
-- **Situação e prioridade aparecem em português** na tela, com os códigos do enum
-  (`PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`, `BAIXA`, `MEDIA`, `ALTA`) traduzidos
-  na apresentação. O payload continua bilíngue, como a ASM-007 da 002 registrou.
-- **Prazo aparece como data civil** (`dd/mm/aaaa`), coerente com o `LocalDate` do
-  D-5. Tarefa sem prazo mostra ausência, não uma data inventada.
-- **O filtro vive na query string** da rota, não só na memória do componente: o
-  endereço filtrado é recarregável e compartilhável (ASM-028).
-- **Toda mutação recarrega a lista da API.** Concluir e excluir não remendam o
-  array local: a tela mostra o que o servidor tem (ASM-030).
-- **Exclusão pede confirmação**, e é a interface que pergunta — o backend não tem
-  parâmetro de confirmação, como a 006 fixou.
-- **404 na exclusão é sucesso do ponto de vista de quem usa:** a tarefa já não
-  está lá, e é isso que a pessoa queria.
-- **Nada de paginação**, coerente com o D-8: a tela mostra o que a API devolve.
+- **Coluna é situação.** Três colunas, na ordem `PENDENTE`, `EM_ANDAMENTO`,
+  `CONCLUIDA` — a ordem do enum, que é a ordem do trabalho. Não existe coluna
+  configurável nem situação nova: o enum é do backend.
+- **A ordem dentro da coluna é a da API**, do `createdAt` mais recente para o
+  mais antigo, como a AC-021 provou.
+- **Mover é `PATCH /status`**; salvar o painel é `PUT`, que substitui a tarefa
+  inteira; criar é `POST`; excluir é `DELETE`. A tela não inventa operação.
+- **A tela não valida no lugar da API.** O título obrigatório e o limite de 120
+  caracteres são regra do backend; o painel mostra o que o envelope de erro
+  devolveu, por campo, em vez de duplicar a regra em TypeScript (ASM-039).
+- **Situação e prioridade aparecem em português**, com os códigos do enum
+  traduzidos na apresentação; o payload continua bilíngue (ASM-007 da 002).
+- **Prazo é data civil** (`dd/mm/aaaa`), coerente com o `LocalDate` do D-5.
+  Tarefa sem prazo mostra ausência, não uma data inventada.
+- **Exclusão pede confirmação**, e quem pergunta é a interface — o backend não
+  tem parâmetro de confirmação, como a 006 fixou.
+- **404 é sucesso do ponto de vista de quem usa:** a tarefa já não está lá, e é
+  isso que a pessoa queria.
 
 ## Casos de erro
 
 | Situação | Comportamento na tela |
 |---|---|
-| API responde 4xx ou 5xx na listagem | mensagem de erro legível, sem status cru nem stack trace (AC-043) |
-| API inalcançável (rede, backend fora) | a mesma mensagem: para quem usa, a diferença não é acionável |
-| 404 na exclusão | tratado como "já não está lá", sem mensagem de erro (AC-046) |
-| 404 na troca de situação | mensagem de erro e a lista recarregada, porque a linha visível está velha |
-| Lista vazia | estado vazio, que não é erro (AC-042) |
+| API responde 4xx ou 5xx na listagem | mensagem legível, sem status cru nem stack trace (AC-050) |
+| API inalcançável | a mesma mensagem: para quem usa, a diferença não é acionável |
+| Falha ao mover o card | o card volta para a coluna de origem, com aviso, porque o servidor não aceitou |
+| Validação recusada ao salvar | mensagem por campo, vinda do envelope de erro, com o painel aberto (AC-055) |
+| 404 ao salvar ou excluir | tratado como "já não está lá": o painel fecha e o quadro recarrega, sem erro |
+| Quadro sem tarefa nenhuma | convite em cada coluna, que não é erro (AC-049) |
 
 ## Impacto técnico
 
-A primeira feature que cria código Angular. Tudo sob `frontend/src/app/` precisa
+A feature cria a interface inteira. Tudo sob `frontend/src/app/` precisa
 aparecer no `Arquivos:` de alguma tarefa: `srcGlobs` cobre esse caminho e
-`ARQUIVO_ORFAO` é aviso no `audit` e erro no `audit --ci`.
+`ARQUIVO_ORFAO` é erro no `audit --ci`.
 
 | Arquivo | Origem | O que muda |
 |---|---|---|
-| `features/tasks/models/task.ts` | novo | os tipos `Task`, `TaskStatus`, `TaskPriority` e o envelope de erro da API |
-| `core/services/task-api.ts` | novo | o único lugar com `HttpClient`: listar, trocar situação, excluir, e a tradução do envelope de erro |
-| `features/tasks/pages/task-list/` | novo | a página: estado em `signal`, filtros ligados à query string, ações de concluir e excluir |
-| `features/tasks/components/task-row/` | novo | a linha da tarefa, sem HTTP — recebe a tarefa e emite as ações |
-| `app.config.ts` | T-009 da 001 | ganha `provideHttpClient` |
-| `app.routes.ts` | T-009 da 001 | ganha a rota da listagem e o redirecionamento da raiz |
-| `app.html`, `styles.css` | T-009 da 001 | cabeçalho da aplicação e o `@import` do Tailwind |
-| `frontend/.postcssrc.json` | novo | o plugin do Tailwind v4 — a configuração inteira |
-| `frontend/package.json` | T-009 da 001 | `tailwindcss` e `@tailwindcss/postcss` em devDependencies |
-| `e2e/tests/task-list.spec.ts` | novo | um teste por critério, no harness da 007 |
-| `specs/constituicao.md` | — | o P-006 sai da fila e entra como seção |
-| `README.md` | — | a tela no bloco de estado atual |
+| `features/tasks/models/task.ts` | da tentativa anterior | os tipos `Task`, `TaskStatus`, `TaskPriority` e o envelope de erro com `fields` |
+| `core/services/task-api.ts` | da tentativa anterior | ganha `criar` e `substituir`; segue sendo o único arquivo com `HttpClient` |
+| `features/tasks/components/task-card/` | novo | o card: título, prioridade, prazo, botões de mover e o acionamento do painel |
+| `features/tasks/pages/task-board/` | novo | o quadro: três colunas, contadores, arrasto, estado em `signal` |
+| `features/tasks/components/task-panel/` | novo | o painel lateral: ler, editar, criar e excluir |
+| `app.routes.ts`, `app.config.ts`, `app.html` | T-009 da 001 | rota do quadro, `provideHttpClient` e o cabeçalho |
+| `styles.css`, `frontend/.postcssrc.json` | T-009 da 001 / novo | Tailwind v4 e a paleta por situação e prioridade |
+| `frontend/package.json` | T-009 da 001 | `tailwindcss`, `@tailwindcss/postcss` e `@angular/cdk` |
+| `e2e/tests/kanban.spec.ts` | novo | um teste por critério, no harness da 007 |
+| `README.md` | — | o quadro no bloco de estado atual |
 
 Decisões:
 
-- **Tailwind v4, e a justificativa não é velocidade.** Para duas telas, CSS à mão
-  são umas duzentas linhas — Tailwind não resolve um problema de volume. O que ele
-  resolve é o que aconteceria sem ele: a 008 e a 010 inventariam nomes de classe
-  em dois lugares diferentes, com duas escalas de espaçamento e nenhum vocabulário
-  comum, e no fim haveria um mini design system ad hoc que ninguém projetou.
-  Tailwind troca isso por um vocabulário que já existe. O custo é duas
-  devDependencies de build, um `.postcssrc.json` e um `@import`: o
-  `@angular/build` já procura config de PostCSS, e as utilidades emitidas para
-  duas telas ficam na casa dos kB de um dígito — os budgets de 500kB e 1MB do
-  `angular.json` não são tocados. A imagem do frontend é indiferente, porque são
-  dependências do estágio de build e o runtime é nginx com arquivos estáticos.
-- **Os `.css` de componente desaparecem.** Com utilitários no template, um arquivo
-  de estilo por componente seria um arquivo vazio — e arquivo listado numa tarefa
-  que nunca nasce deixa `ARQUIVO_INEXISTENTE` pendurado no audit. Estilo que não
-  couber em utilitário entra no `styles.css`, com nome, e aí é decisão
-  deliberada em vez de sobra.
-- **Sem interceptor.** O `core/interceptors/` que o CLAUDE.md prevê fica vazio
-  nesta feature: a tradução do envelope de erro é uma função no serviço, e um
-  interceptor sem autenticação, sem retry e sem correlação a fazer seria
-  abstração à espera de problema (ASM-031).
-- **A tradução do enum para português vive na apresentação**, num mapa simples, e
-  não no serviço: é decisão de tela, e o dia que houver segundo idioma é ela que
-  muda.
-- **O E2E não seleciona por classe** (RNF-35). Com Tailwind isso deixou de ser
-  boa prática opcional e passou a ser a única opção viável: papel, texto
-  acessível ou `data-testid`.
+- **`@angular/cdk` para o arrasto.** O `cdkDropList`/`cdkDrag` resolve
+  acessibilidade, área de soltura e o marcador de posição — escrever isso à mão
+  seria reimplementar uma biblioteca do próprio Angular com menos cuidado. É
+  dependência de runtime, não de build, e é a única nova.
+- **Arrastar e botão, os dois.** O arrasto é o gesto que define o modelo; o
+  botão é o que faz a mesma coisa funcionar no teclado e no telefone (RNF-43).
+  São dois caminhos para uma chamada só, e os dois têm critério próprio
+  (AC-051 e AC-052).
+- **Painel lateral, não página própria.** O quadro continua visível atrás, que
+  é o contexto de quem está organizando trabalho. Página dedicada entraria se
+  o card ganhasse histórico ou comentário — hoje não tem.
+- **Um painel para editar e para criar.** Os campos são os mesmos e o backend
+  aceita `POST` e `PUT` com o mesmo corpo; dois componentes quase idênticos
+  seriam duplicação sem ganho. O painel sabe se tem id.
+- **Cor carrega informação.** Cada coluna tem seu tom — âmbar para pendente,
+  índigo para em andamento, verde para concluída — e a prioridade tem uma
+  etiqueta colorida no card. Não é decoração: é o que permite achar a coluna e
+  medir o peso da tarefa sem ler. O papel e o texto seguem neutros, para que a
+  cor signifique alguma coisa quando aparece.
+- **Sem atualização otimista.** O card muda de coluna depois da resposta do
+  servidor. Custa uma ida e volta de rede antes do movimento se firmar; em
+  troca, o quadro nunca mostra um estado que o banco não tem.
 
 ## Dependências
 
-- **Depende de:** 007-e2e-proof (o harness, sem o qual nenhum critério desta tela
-  pode ser provado — é dependência de gate, não de código), 001-project-setup (o
-  esqueleto Angular e o `nginx.conf`), 004-list-tasks (a rota de listagem com os
-  filtros que a tela usa), 005-update-task (o `PATCH /status` da troca rápida) e
-  006-delete-task (o `DELETE`, e a Q-008 que definiu o 404 que a AC-046 trata).
-- **Bloqueia:** 010-frontend-task-form, que entra pela mesma tela no botão de
-  criar e de editar, e reusa o serviço, os tipos e o vocabulário visual desta
-  feature.
+- **Depende de:** 007-e2e-proof (o harness — dependência de gate),
+  001-project-setup (o esqueleto Angular e o `nginx.conf`), 003-create-task
+  (`POST`), 004-list-tasks (a listagem), 005-update-task (`PUT` e
+  `PATCH /status`), 006-delete-task (`DELETE`) e 009-list-null-title, sem a qual
+  a primeira listagem do quadro responderia 500.
+- **Bloqueia:** nada. É a última feature planejada do escopo atual.
 - **Externas:** Docker rodando, para o compose que o E2E exercita.
-- **Bibliotecas:** `tailwindcss` e `@tailwindcss/postcss`, as duas em
-  devDependencies do frontend. O Playwright já entrou na 007.
+- **Bibliotecas:** `@angular/cdk` em dependências; `tailwindcss` e
+  `@tailwindcss/postcss` em devDependencies.
 
 ## Fora de escopo
 
-- **Criar e editar tarefa** — é a 010, com o formulário reativo e a validação
-  espelhando a da API.
-- **Testes unitários de componente** (`@angular/build:unit-test` com Vitest): a
-  prova desta feature é E2E, pelo harness da 007. O `skipTests: true` dos
-  schematics no `angular.json` continua como está.
-- Destaque visual de tarefa atrasada, ordenação escolhida na tela, paginação e
-  busca com debounce ajustável.
-- Autenticação, usuário e permissão: a tarefa não tem dono (ASM-003 da 001).
-- Acessibilidade além de foco visível e rótulo em controle — o que a RNF-35 já
-  exige por via dos seletores de teste — e tema escuro.
-- Responsividade além de a tela não quebrar em largura de telefone.
-- Qualquer mudança de backend (RNF-36).
+- **Busca por título e filtro de situação** — o quadro mostra as três situações
+  de uma vez, e a busca volta quando houver volume que a justifique (ASM-038).
+- **Ordem manual dentro da coluna**: a ordem é a da API. Reordenar à mão
+  exigiria um campo de posição no backend, que não existe.
+- **Coluna configurável, raia, etiqueta, responsável e comentário**: o domínio
+  tem oito campos e nenhum deles é dono ou marcador.
+- **Destaque de tarefa atrasada** e tema escuro.
+- **Testes unitários de componente**: a prova desta feature é E2E, pelo harness
+  da 007.
+- **Qualquer mudança de backend** (RNF-42).
 
 ## Suposições
 
 | ID | Suposição | Status | Resolução |
 |---|---|---|---|
-| ASM-027 | Sem biblioteca de estado: o estado da tela são `signal` do Angular, e a lista tem uma fonte só — a resposta da API. NgRx resolveria um problema de estado compartilhado entre telas distantes, que não existe com duas telas. | confirmada | Confirmada em 27/09/2026: `signal` bastam; NgRx entra se houver estado compartilhado |
-| ASM-028 | O filtro é espelhado na query string da rota, e a tela lê o filtro de lá. Custa ler e escrever parâmetro de rota; em troca o endereço filtrado é recarregável e compartilhável, e é o que a AC-041 exige. Sem isso, recarregar a página perderia o filtro. | confirmada | Confirmada em 27/09/2026: filtro na query string, recarregável |
-| ASM-029 | O CSS é Tailwind v4, com `tailwindcss` e `@tailwindcss/postcss` em devDependencies do frontend, um `.postcssrc.json` e um `@import` no `styles.css` — a v4 dispensa `tailwind.config`. A justificativa está em "Impacto técnico": não é velocidade, é não deixar a 008 e a 010 inventarem um design system ad hoc em dois lugares. O preço são duas dependências de build e utilitários no template em vez de nomes semânticos de classe. | confirmada | Confirmada em 27/09/2026: Tailwind v4 aprovado pelo mantenedor, com a justificativa registrada |
-| ASM-030 | Toda mutação recarrega a lista da API, em vez de atualizar o array local. Custa uma requisição a mais por ação; em troca a tela nunca diverge do servidor, e a AC-044 pode ser provada com um recarregamento. | confirmada | Confirmada em 27/09/2026: recarrega da API; sem atualização otimista |
-| ASM-031 | Nenhum interceptor: a tradução do envelope de erro é função do serviço. `core/interceptors/` nasce vazio e ganha conteúdo na feature que tiver autenticação, retry ou correlação para resolver. | confirmada | Confirmada em 27/09/2026: sem interceptor enquanto não houver problema concreto |
+| ASM-035 | O painel lateral edita todos os campos — título, descrição, situação, prioridade e prazo — e não só a descrição. Isso absorve o formulário que estava planejado para a feature seguinte, e é por isso que não existe 010: criar, ler, editar e excluir cabem no mesmo painel. O preço é uma feature maior. | confirmada | Confirmada em 28/09/2026: painel com todos os campos, decidido pelo mantenedor |
+| ASM-036 | Sem biblioteca de estado e sem atualização otimista: o estado são `signal`, e toda mutação recarrega o quadro da API. Custa uma requisição a mais por ação; em troca o quadro nunca diverge do servidor, e cada critério pode ser provado com um recarregamento. | confirmada | Confirmada em 28/09/2026: `signal` e recarga pela API |
+| ASM-037 | O arrasto vem do `@angular/cdk`. É dependência de runtime nova, do próprio Angular, versionada junto com o framework. A alternativa — eventos de ponteiro à mão — economizaria a dependência e custaria acessibilidade e área de soltura escritas do zero. | confirmada | Confirmada em 28/09/2026: `@angular/cdk`, com o arrasto e o botão convivendo |
+| ASM-038 | O quadro não tem busca nem filtro. Com as três colunas visíveis, o filtro de situação perde sentido, e a busca por título só passa a valer quando uma coluna tiver mais cards do que cabe na tela. Enquanto isso, procurar é rolar. | confirmada | Confirmada em 28/09/2026: filtro fora do escopo desta feature |
+| ASM-039 | A validação não é duplicada no TypeScript: o painel envia e mostra o que o envelope de erro devolveu, campo a campo. Custa uma ida ao servidor para descobrir que o título está vazio; em troca existe uma regra só, no lugar onde ela é obrigatória, e a tela não mente sobre o que a API aceita. | confirmada | Confirmada em 28/09/2026: validação vem do backend, exibida por campo |
+| ASM-040 | O arrasto do CDK é dirigido no teste por eventos de mouse do Playwright (`mouse.down`, `mouse.move` em passos, `mouse.up`), porque o `dragTo` num salto só pode não disparar o limiar de arrasto do CDK. Se o gesto se mostrar instável no navegador headless, o critério AC-051 passa a ser provado pelo mesmo caminho de teclado do CDK, e isso fica registrado aqui — nunca removendo o critério. | confirmada | Confirmada em 28/09/2026: arrasto por eventos de mouse em passos |
 
 ## Perguntas em aberto
 
-| ID | Pergunta | Status | Resposta |
-|---|---|---|---|
-| Q-011 | A AC-043 pede que falha da API apareça como mensagem, e o E2E precisa de um jeito de causar essa falha contra o compose. Recomendação: interceptar a rota no navegador (`page.route` do Playwright, devolvendo 500), em vez de derrubar o backend ou apontar a tela para um endereço inválido. É determinístico, não mexe no estado do compose e não deixa o container num estado que o teste seguinte herda. O preço é que o erro é simulado na borda do navegador, não no servidor — mas o que esta AC observa é o comportamento da tela, e para isso a origem do 500 é indiferente. | respondida | Respondida em 27/09/2026: `page.route` devolvendo 500; sem derrubar o backend |
+Nenhuma. As quatro decisões que faltavam — destino da lista, arrasto contra
+botão, o que o painel edita e se criar entra nesta feature — foram respondidas
+pelo mantenedor em 28/09/2026 e estão registradas acima como suposições
+confirmadas.
