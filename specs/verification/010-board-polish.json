@@ -1,0 +1,27 @@
+{
+  "feature": "010-board-polish",
+  "timestamp": "2026-09-28T22:08:50.967Z",
+  "gitRev": "a8383ff",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 60,
+  "results": {
+    "AC-058": {
+      "status": "pass",
+      "testName": "@spec:AC-058 a exclusão pergunta pela própria interface",
+      "method": "tap"
+    },
+    "AC-059": {
+      "status": "pass",
+      "testName": "@spec:AC-059 a aba usa o ícone do projeto",
+      "method": "tap"
+    },
+    "AC-060": {
+      "status": "pass",
+      "testName": "@spec:AC-060 o painel entra com animação e respeita movimento reduzido",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}
