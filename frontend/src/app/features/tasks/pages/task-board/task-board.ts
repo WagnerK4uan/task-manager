@@ -1,6 +1,7 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { TaskApi, TaskApiFailure } from '../../../../core/services/task-api';
+import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 import { TaskCard } from '../../components/task-card/task-card';
 import { TaskPanel } from '../../components/task-panel/task-panel';
 import { ApiErrorField, Task, TaskPayload, TaskStatus } from '../../models/task';
@@ -39,7 +40,7 @@ const COLUNAS: Coluna[] = [
 
 @Component({
   selector: 'app-task-board',
-  imports: [DragDropModule, TaskCard, TaskPanel],
+  imports: [DragDropModule, TaskCard, TaskPanel, ConfirmDialog],
   templateUrl: './task-board.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -60,6 +61,10 @@ export class TaskBoard {
   readonly salvando = signal(false);
   readonly recusados = signal<ApiErrorField[]>([]);
 
+  readonly selecionando = signal(false);
+  readonly selecionadas = signal<ReadonlySet<number>>(new Set());
+  readonly confirmandoLote = signal(false);
+
   constructor() {
     void this.carregar();
   }
@@ -67,6 +72,27 @@ export class TaskBoard {
   resumo(): string {
     const total = this.tarefas().length;
     return total === 1 ? '1 tarefa no quadro' : `${total} tarefas no quadro`;
+  }
+
+  quantidadeSelecionada(): string {
+    const total = this.selecionadas().size;
+    return total === 1 ? '1 selecionada' : `${total} selecionadas`;
+  }
+
+  tituloDoLote(): string {
+    const total = this.selecionadas().size;
+    return total === 1 ? 'Excluir 1 tarefa?' : `Excluir ${total} tarefas?`;
+  }
+
+  avisoDoLote(): string {
+    const total = this.selecionadas().size;
+    const quais = total === 1 ? '1 tarefa será removida' : `${total} tarefas serão removidas`;
+    return `${quais} do quadro. Não há como desfazer.`;
+  }
+
+  colunaMarcada(status: TaskStatus): boolean {
+    const daColuna = this.tarefasDa(status);
+    return daColuna.length > 0 && daColuna.every((tarefa) => this.selecionadas().has(tarefa.id));
   }
 
   tarefasDa(status: TaskStatus): Task[] {
@@ -176,6 +202,73 @@ export class TaskBoard {
 
     this.fecharPainel();
     await this.carregar();
+  }
+
+  @HostListener('document:keydown.escape')
+  aoApertarEsc(): void {
+    this.confirmandoLote.set(false);
+  }
+
+  entrarNaSelecao(): void {
+    this.selecionadas.set(new Set());
+    this.selecionando.set(true);
+  }
+
+  sairDaSelecao(): void {
+    this.confirmandoLote.set(false);
+    this.selecionando.set(false);
+    this.selecionadas.set(new Set());
+  }
+
+  alternarSelecao(tarefa: Task): void {
+    const marcadas = new Set(this.selecionadas());
+    if (!marcadas.delete(tarefa.id)) marcadas.add(tarefa.id);
+    this.selecionadas.set(marcadas);
+  }
+
+  alternarColuna(status: TaskStatus): void {
+    const marcar = !this.colunaMarcada(status);
+    const marcadas = new Set(this.selecionadas());
+
+    for (const tarefa of this.tarefasDa(status)) {
+      if (marcar) marcadas.add(tarefa.id);
+      else marcadas.delete(tarefa.id);
+    }
+
+    this.selecionadas.set(marcadas);
+  }
+
+  pedirExclusaoDoLote(): void {
+    if (this.selecionadas().size > 0) this.confirmandoLote.set(true);
+  }
+
+  cancelarExclusaoDoLote(): void {
+    this.confirmandoLote.set(false);
+  }
+
+  async excluirSelecionadas(): Promise<void> {
+    const ids = [...this.selecionadas()];
+    this.confirmandoLote.set(false);
+    this.aviso.set(null);
+
+    try {
+      await this.api.excluirVarias(ids);
+      this.sairDaSelecao();
+    } catch (erro) {
+      this.aviso.set(
+        erro instanceof TaskApiFailure && erro.naoEncontrada
+          ? 'Alguma tarefa já não existia; nada foi excluído. O quadro foi atualizado.'
+          : 'Não foi possível excluir as tarefas selecionadas. O quadro foi atualizado.',
+      );
+    }
+
+    await this.carregar();
+    this.podarSelecao();
+  }
+
+  private podarSelecao(): void {
+    const existentes = new Set(this.tarefas().map((tarefa) => tarefa.id));
+    this.selecionadas.set(new Set([...this.selecionadas()].filter((id) => existentes.has(id))));
   }
 
   private async trocarSituacao(tarefa: Task, destino: TaskStatus): Promise<void> {

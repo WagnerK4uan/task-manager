@@ -1,6 +1,43 @@
-<p class="mb-4 text-meta text-ink-muted" data-testid="estado">
-  {{ carregando() ? 'Carregando o quadro' : resumo() }}
-</p>
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <p class="text-meta text-ink-muted" data-testid="estado">
+    {{ carregando() ? 'Carregando o quadro' : resumo() }}
+  </p>
+
+  @if (selecionando()) {
+    <div class="flex items-center gap-3" role="toolbar" aria-label="Seleção de tarefas" data-testid="barra-selecao">
+      <span class="text-meta font-medium text-ink" aria-live="polite" data-testid="selecionadas">
+        {{ quantidadeSelecionada() }}
+      </span>
+      <button
+        type="button"
+        class="rounded-md bg-alta px-3 py-1.5 text-meta font-medium text-surface hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        [disabled]="selecionadas().size === 0"
+        (click)="pedirExclusaoDoLote()"
+        data-testid="excluir-selecionadas"
+      >
+        Excluir selecionadas
+      </button>
+      <button
+        type="button"
+        class="rounded-md border border-rule bg-surface px-3 py-1.5 text-meta font-medium text-ink hover:bg-paper"
+        (click)="sairDaSelecao()"
+        data-testid="cancelar-selecao"
+      >
+        Cancelar
+      </button>
+    </div>
+  } @else {
+    <button
+      type="button"
+      class="rounded-md border border-rule bg-surface px-3 py-1.5 text-meta font-medium text-ink hover:bg-paper disabled:cursor-not-allowed disabled:opacity-40"
+      [disabled]="tarefas().length === 0"
+      (click)="entrarNaSelecao()"
+      data-testid="selecionar"
+    >
+      Selecionar
+    </button>
+  }
+</div>
 
 @if (erro()) {
   <div role="alert" data-testid="erro" class="mb-5 rounded-lg border border-alta/30 bg-alta-wash p-4">
@@ -40,15 +77,28 @@
         </span>
       </header>
 
-      <button
-        type="button"
-        class="mt-3 w-full rounded-md border border-dashed border-ink/20 py-2 text-meta font-medium text-ink-muted hover:border-ink/40 hover:text-ink"
-        [attr.aria-label]="'Nova tarefa em ' + coluna.titulo"
-        (click)="abrirCriacao(coluna.status)"
-        data-testid="criar"
-      >
-        + Nova tarefa
-      </button>
+      @if (selecionando()) {
+        <button
+          type="button"
+          class="mt-3 w-full rounded-md border border-ink/20 bg-surface py-2 text-meta font-medium text-ink hover:border-ink/40 disabled:cursor-not-allowed disabled:opacity-40"
+          [attr.aria-label]="(colunaMarcada(coluna.status) ? 'Desmarcar todas em ' : 'Marcar todas em ') + coluna.titulo"
+          [disabled]="tarefasDa(coluna.status).length === 0"
+          (click)="alternarColuna(coluna.status)"
+          data-testid="marcar-coluna"
+        >
+          {{ colunaMarcada(coluna.status) ? 'Desmarcar todas' : 'Marcar todas' }}
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="mt-3 w-full rounded-md border border-dashed border-ink/20 py-2 text-meta font-medium text-ink-muted hover:border-ink/40 hover:text-ink"
+          [attr.aria-label]="'Nova tarefa em ' + coluna.titulo"
+          (click)="abrirCriacao(coluna.status)"
+          data-testid="criar"
+        >
+          + Nova tarefa
+        </button>
+      }
 
       <div
         class="mt-3 flex min-h-24 flex-col gap-3"
@@ -60,13 +110,17 @@
           <app-task-card
             cdkDrag
             [cdkDragData]="tarefa"
+            [cdkDragDisabled]="selecionando()"
             [tarefa]="tarefa"
+            [selecionavel]="selecionando()"
+            [selecionada]="selecionadas().has(tarefa.id)"
             [destinoSeguinte]="destinoSeguinte(tarefa.status)"
             [destinoAnterior]="destinoAnterior(tarefa.status)"
             [recemMexida]="tarefa.id === recemMexida()"
             (abrir)="abrirCard($event)"
             (avancar)="mover($event, 1)"
             (voltar)="mover($event, -1)"
+            (alternar)="alternarSelecao($event)"
           />
         }
 
@@ -89,5 +143,15 @@
     (salvar)="salvarPainel($event)"
     (excluir)="excluirTarefa($event)"
     (fechar)="fecharPainel()"
+  />
+}
+
+@if (confirmandoLote()) {
+  <app-confirm-dialog
+    [titulo]="tituloDoLote()"
+    [mensagem]="avisoDoLote()"
+    acao="Excluir"
+    (confirmar)="excluirSelecionadas()"
+    (cancelar)="cancelarExclusaoDoLote()"
   />
 }

@@ -23,10 +23,13 @@ export class TaskCard {
   readonly destinoSeguinte = input<string | null>(null);
   readonly destinoAnterior = input<string | null>(null);
   readonly recemMexida = input(false);
+  readonly selecionavel = input(false);
+  readonly selecionada = input(false);
 
   readonly abrir = output<Task>();
   readonly avancar = output<Task>();
   readonly voltar = output<Task>();
+  readonly alternar = output<Task>();
 
   readonly prioridade = computed(() => PRIORIDADE[this.tarefa().priority]);
   readonly corDaPrioridade = computed(() => COR_DA_PRIORIDADE[this.tarefa().priority]);
@@ -38,4 +41,8 @@ export class TaskCard {
     const [ano, mes, dia] = iso.split('-');
     return `${dia}/${mes}/${ano}`;
   });
+
+  acionarCard(): void {
+    if (this.selecionavel()) this.alternar.emit(this.tarefa());
+  }
 }

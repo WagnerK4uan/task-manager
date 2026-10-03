@@ -54,6 +54,10 @@ export class TaskApi {
     return this.pedir(this.http.delete<void>(`${this.rota}/${id}`));
   }
 
+  excluirVarias(ids: number[]): Promise<void> {
+    return this.pedir(this.http.post<void>(`${this.rota}/batch-delete`, { ids }));
+  }
+
   private async pedir<T>(chamada: Observable<T>): Promise<T> {
     try {
       return await firstValueFrom(chamada);
