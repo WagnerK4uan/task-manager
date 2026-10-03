@@ -1,0 +1,47 @@
+{
+  "feature": "011-batch-delete",
+  "timestamp": "2026-10-03T19:29:04.012Z",
+  "gitRev": "36b0bca",
+  "command": "node scripts/spec-tap.mjs",
+  "reporter": "tap",
+  "exitCode": 0,
+  "testsParsed": 72,
+  "results": {
+    "AC-061": {
+      "status": "pass",
+      "testName": "@spec:AC-061 o lote exclui todas as tarefas indicadas e não encosta nas demais",
+      "method": "tap"
+    },
+    "AC-062": {
+      "status": "pass",
+      "testName": "@spec:AC-062 lote com tarefa inexistente vira exceção e não exclui nada",
+      "method": "tap"
+    },
+    "AC-063": {
+      "status": "pass",
+      "testName": "@spec:AC-063 lote sem ids, vazio ou com null é VALIDATION_ERROR e não chama a aplicação",
+      "method": "tap"
+    },
+    "AC-064": {
+      "status": "pass",
+      "testName": "@spec:AC-064 id repetido no lote conta uma vez",
+      "method": "tap"
+    },
+    "AC-065": {
+      "status": "pass",
+      "testName": "@spec:AC-065 o modo seleção marca cards em vez de abri-los",
+      "method": "tap"
+    },
+    "AC-066": {
+      "status": "pass",
+      "testName": "@spec:AC-066 as selecionadas saem juntas, depois de uma confirmação",
+      "method": "tap"
+    },
+    "AC-067": {
+      "status": "pass",
+      "testName": "@spec:AC-067 marcar todas de uma coluna",
+      "method": "tap"
+    }
+  },
+  "principles": {}
+}

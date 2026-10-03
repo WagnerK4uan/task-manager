@@ -1,11 +1,11 @@
 {
   "feature": "010-board-polish",
-  "timestamp": "2026-09-28T22:08:50.967Z",
-  "gitRev": "a8383ff",
+  "timestamp": "2026-10-03T19:40:18.743Z",
+  "gitRev": "5c324d7",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
-  "testsParsed": 60,
+  "testsParsed": 72,
   "results": {
     "AC-058": {
       "status": "pass",

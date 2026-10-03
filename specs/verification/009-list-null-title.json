@@ -1,11 +1,11 @@
 {
   "feature": "009-list-null-title",
-  "timestamp": "2026-09-28T22:15:36.660Z",
-  "gitRev": "a8383ff",
+  "timestamp": "2026-10-03T19:39:27.405Z",
+  "gitRev": "24b8cff",
   "command": "node scripts/spec-tap.mjs",
   "reporter": "tap",
   "exitCode": 0,
-  "testsParsed": 60,
+  "testsParsed": 72,
   "results": {
     "AC-047": {
       "status": "pass",
