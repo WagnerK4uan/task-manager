@@ -29,3 +29,8 @@
 - Refs: US-025, AC-065, AC-066, AC-067
 - Arquivos: e2e/tests/batch-delete.spec.ts
 - Notas: um teste por critério, no molde do `kanban-polish.spec.ts`. O AC-066 falha se o navegador disparar qualquer `dialog`.
+
+## T-070 — Barra de seleção cabe em tela estreita [pendente]
+- Refs: US-025, AC-065
+- Arquivos: frontend/src/app/features/tasks/pages/task-board/task-board.html
+- Notas: em 357 px a contagem e o "Excluir selecionadas" quebravam em duas linhas. Abaixo de `sm` a barra ocupa a linha inteira, nenhum texto quebra e o botão mostra só "Excluir", mantendo o nome acessível "Excluir selecionadas".

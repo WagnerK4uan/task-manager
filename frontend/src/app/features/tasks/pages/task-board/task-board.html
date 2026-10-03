@@ -4,22 +4,23 @@
   </p>
 
   @if (selecionando()) {
-    <div class="flex items-center gap-3" role="toolbar" aria-label="Seleção de tarefas" data-testid="barra-selecao">
-      <span class="text-meta font-medium text-ink" aria-live="polite" data-testid="selecionadas">
+    <div class="flex w-full items-center gap-3 sm:w-auto" role="toolbar" aria-label="Seleção de tarefas" data-testid="barra-selecao">
+      <span class="mr-auto whitespace-nowrap text-meta font-medium text-ink sm:mr-0" aria-live="polite" data-testid="selecionadas">
         {{ quantidadeSelecionada() }}
       </span>
       <button
         type="button"
-        class="rounded-md bg-alta px-3 py-1.5 text-meta font-medium text-surface hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        class="whitespace-nowrap rounded-md border border-transparent bg-alta px-3 py-1.5 text-meta font-medium text-surface hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Excluir selecionadas"
         [disabled]="selecionadas().size === 0"
         (click)="pedirExclusaoDoLote()"
         data-testid="excluir-selecionadas"
       >
-        Excluir selecionadas
+        Excluir<span class="hidden sm:inline"> selecionadas</span>
       </button>
       <button
         type="button"
-        class="rounded-md border border-rule bg-surface px-3 py-1.5 text-meta font-medium text-ink hover:bg-paper"
+        class="whitespace-nowrap rounded-md border border-rule bg-surface px-3 py-1.5 text-meta font-medium text-ink hover:bg-paper"
         (click)="sairDaSelecao()"
         data-testid="cancelar-selecao"
       >
