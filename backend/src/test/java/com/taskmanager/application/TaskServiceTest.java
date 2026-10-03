@@ -3,6 +3,7 @@ package com.taskmanager.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.taskmanager.application.dto.TaskBatchDeleteRequest;
 import com.taskmanager.application.dto.TaskCreateRequest;
 import com.taskmanager.application.dto.TaskResponse;
 import com.taskmanager.application.dto.TaskStatusUpdateRequest;
@@ -181,6 +182,50 @@ class TaskServiceTest {
         assertThat(service.listar(null, null))
                 .extracting(TaskResponse::id)
                 .containsExactly(mantida.id());
+    }
+
+    @Test
+    @DisplayName("@spec:AC-061 o lote exclui todas as tarefas indicadas e não encosta nas demais")
+    void loteExcluiTodasAsTarefasIndicadas() {
+        TaskResponse primeira = criar("Primeira do lote", TaskStatus.CONCLUIDA);
+        TaskResponse segunda = criar("Segunda do lote", TaskStatus.CONCLUIDA);
+        TaskResponse mantida = criar("Fora do lote", TaskStatus.PENDENTE);
+
+        service.excluirVarias(new TaskBatchDeleteRequest(List.of(primeira.id(), segunda.id())));
+
+        assertThat(service.listar(null, null))
+                .extracting(TaskResponse::id)
+                .containsExactly(mantida.id());
+    }
+
+    @Test
+    @DisplayName("@spec:AC-062 lote com tarefa inexistente vira exceção e não exclui nada")
+    void loteComTarefaInexistenteNaoExcluiNada() {
+        TaskResponse primeira = criar("Primeira do lote", TaskStatus.PENDENTE);
+        TaskResponse segunda = criar("Segunda do lote", TaskStatus.PENDENTE);
+
+        assertThatThrownBy(
+                        () ->
+                                service.excluirVarias(
+                                        new TaskBatchDeleteRequest(
+                                                List.of(primeira.id(), segunda.id(), 999L))))
+                .isInstanceOf(TaskNotFoundException.class)
+                .hasMessage("Task not found");
+
+        assertThat(service.listar(null, null))
+                .extracting(TaskResponse::id)
+                .containsExactlyInAnyOrder(primeira.id(), segunda.id());
+    }
+
+    @Test
+    @DisplayName("@spec:AC-064 id repetido no lote conta uma vez")
+    void idRepetidoNoLoteContaUmaVez() {
+        TaskResponse repetida = criar("Repetida no lote", TaskStatus.PENDENTE);
+
+        service.excluirVarias(new TaskBatchDeleteRequest(List.of(repetida.id(), repetida.id())));
+
+        assertThatThrownBy(() -> service.buscarPorId(repetida.id()))
+                .isInstanceOf(TaskNotFoundException.class);
     }
 
     private TaskResponse criar(String titulo, TaskStatus status) {

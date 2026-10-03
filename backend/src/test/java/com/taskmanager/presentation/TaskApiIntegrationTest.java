@@ -214,6 +214,45 @@ class TaskApiIntegrationTest extends PostgresIntegrationTest {
         assertThat(colecao.headers().firstValue("Allow").orElseThrow()).doesNotContain("DELETE");
     }
 
+    @Test
+    @DisplayName("@spec:AC-061 o lote responde 204 e só as tarefas dele deixam de existir")
+    void loteExcluiAsTarefasDele() throws Exception {
+        long primeira = criarTarefa("Primeira do lote AC-061");
+        long segunda = criarTarefa("Segunda do lote AC-061");
+        long mantida = criarTarefa("Fora do lote AC-061");
+
+        HttpResponse<String> lote =
+                requisicao(
+                        "POST",
+                        "/api/tasks/batch-delete",
+                        "{\"ids\": [%d, %d]}".formatted(primeira, segunda));
+
+        assertThat(lote.statusCode()).isEqualTo(204);
+        assertThat(lote.body()).isEmpty();
+        assertThat(requisicao("GET", "/api/tasks/" + primeira).statusCode()).isEqualTo(404);
+        assertThat(requisicao("GET", "/api/tasks/" + segunda).statusCode()).isEqualTo(404);
+        assertThat(requisicao("GET", "/api/tasks/" + mantida).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("@spec:AC-062 lote com tarefa inexistente responde 404 e o banco fica como estava")
+    void loteComTarefaInexistenteNaoExcluiNada() throws Exception {
+        long primeira = criarTarefa("Primeira do lote AC-062");
+        long segunda = criarTarefa("Segunda do lote AC-062");
+
+        HttpResponse<String> lote =
+                requisicao(
+                        "POST",
+                        "/api/tasks/batch-delete",
+                        "{\"ids\": [%d, %d, 999999]}".formatted(primeira, segunda));
+
+        assertThat(lote.statusCode()).isEqualTo(404);
+        assertThat(new ObjectMapper().readTree(lote.body()).path("error").asString())
+                .isEqualTo("TASK_NOT_FOUND");
+        assertThat(requisicao("GET", "/api/tasks/" + primeira).statusCode()).isEqualTo(200);
+        assertThat(requisicao("GET", "/api/tasks/" + segunda).statusCode()).isEqualTo(200);
+    }
+
     private long criarTarefa(String titulo) throws Exception {
         String corpo =
                 """

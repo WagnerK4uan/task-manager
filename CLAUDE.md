@@ -166,6 +166,7 @@ rejeitado. Mapeamentos no `GlobalExceptionHandler`:
 | PUT | `/api/tasks/{id}` | 200 |
 | PATCH | `/api/tasks/{id}/status` | 200 |
 | DELETE | `/api/tasks/{id}` | 204 |
+| POST | `/api/tasks/batch-delete` | 204 |
 
 `PUT` substitui a tarefa inteira, inclusive o status, porque o formulário de
 edição tem o campo. `PATCH /status` existe para a troca rápida a partir da

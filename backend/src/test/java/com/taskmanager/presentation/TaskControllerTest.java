@@ -2,7 +2,9 @@ package com.taskmanager.presentation;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -20,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.taskmanager.application.dto.TaskBatchDeleteRequest;
 import com.taskmanager.application.dto.TaskCreateRequest;
 import com.taskmanager.application.dto.TaskResponse;
 import com.taskmanager.application.dto.TaskStatusUpdateRequest;
@@ -370,6 +373,54 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.path").value("/api/tasks/999"))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(content().string(not(containsString("Exception"))));
+    }
+
+    @Test
+    @DisplayName("@spec:AC-061 o lote responde 204 sem corpo e entrega os ids ao service")
+    void loteResponde204SemCorpo() throws Exception {
+        mockMvc.perform(
+                        post("/api/tasks/batch-delete")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"ids\": [7, 8]}"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(service).excluirVarias(new TaskBatchDeleteRequest(List.of(7L, 8L)));
+    }
+
+    @Test
+    @DisplayName("@spec:AC-063 lote sem ids, vazio ou com null é VALIDATION_ERROR e não chama a aplicação")
+    void loteSemIdsERecusado() throws Exception {
+        for (String corpo : List.of("{}", "{\"ids\": []}", "{\"ids\": [7, null]}")) {
+            mockMvc.perform(
+                            post("/api/tasks/batch-delete")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(corpo))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value(400))
+                    .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.path").value("/api/tasks/batch-delete"))
+                    .andExpect(jsonPath("$.fields[*].field").value(everyItem(startsWith("ids"))))
+                    .andExpect(jsonPath("$.fields.length()").value(1));
+        }
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    @DisplayName("@spec:AC-062 lote com tarefa inexistente responde 404 no contrato único")
+    void loteComTarefaInexistenteResponde404() throws Exception {
+        willThrow(new TaskNotFoundException())
+                .given(service)
+                .excluirVarias(any(TaskBatchDeleteRequest.class));
+
+        mockMvc.perform(
+                        post("/api/tasks/batch-delete")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"ids\": [7, 999]}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("TASK_NOT_FOUND"))
+                .andExpect(jsonPath("$.path").value("/api/tasks/batch-delete"));
     }
 
     private static TaskResponse comIdEData(Long id, String titulo, String criadaEm) {

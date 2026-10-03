@@ -149,6 +149,7 @@ use o compose.
 | PUT | `/api/tasks/{id}` | 200 | implementada |
 | PATCH | `/api/tasks/{id}/status` | 200 | implementada |
 | DELETE | `/api/tasks/{id}` | 204 | implementada |
+| POST | `/api/tasks/batch-delete` | 204 | implementada |
 
 Criar uma tarefa — situação e prioridade são obrigatórias, e o header
 `Location` da resposta é o endereço da tarefa criada:

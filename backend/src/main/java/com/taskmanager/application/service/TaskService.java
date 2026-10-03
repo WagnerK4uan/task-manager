@@ -1,5 +1,6 @@
 package com.taskmanager.application.service;
 
+import com.taskmanager.application.dto.TaskBatchDeleteRequest;
 import com.taskmanager.application.dto.TaskCreateRequest;
 import com.taskmanager.application.dto.TaskResponse;
 import com.taskmanager.application.dto.TaskStatusUpdateRequest;
@@ -49,6 +50,14 @@ public class TaskService {
     public void excluir(Long id) {
         carregar(id);
         repositorio.excluirPorId(id);
+    }
+
+    public void excluirVarias(TaskBatchDeleteRequest request) {
+        List<Long> ids = request.ids().stream().distinct().toList();
+        if (repositorio.contarExistentes(ids) != ids.size()) {
+            throw new TaskNotFoundException();
+        }
+        repositorio.excluirPorIds(ids);
     }
 
     private Task carregar(Long id) {

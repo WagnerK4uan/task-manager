@@ -1,5 +1,6 @@
 package com.taskmanager.presentation.controller;
 
+import com.taskmanager.application.dto.TaskBatchDeleteRequest;
 import com.taskmanager.application.dto.TaskCreateRequest;
 import com.taskmanager.application.dto.TaskResponse;
 import com.taskmanager.application.dto.TaskStatusUpdateRequest;
@@ -67,5 +68,11 @@ public class TaskController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable Long id) {
         service.excluir(id);
+    }
+
+    @PostMapping("/batch-delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluirVarias(@Valid @RequestBody TaskBatchDeleteRequest request) {
+        service.excluirVarias(request);
     }
 }
