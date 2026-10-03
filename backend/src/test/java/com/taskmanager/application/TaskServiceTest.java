@@ -15,6 +15,7 @@ import com.taskmanager.domain.exception.TaskNotFoundException;
 import com.taskmanager.domain.repository.TaskRepository;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -221,6 +222,16 @@ class TaskServiceTest {
         @Override
         public void excluirPorId(Long id) {
             tarefas.remove(id);
+        }
+
+        @Override
+        public long contarExistentes(Collection<Long> ids) {
+            return ids.stream().filter(tarefas::containsKey).count();
+        }
+
+        @Override
+        public void excluirPorIds(Collection<Long> ids) {
+            ids.forEach(tarefas::remove);
         }
     }
 

@@ -3,6 +3,7 @@ package com.taskmanager.infrastructure.persistence;
 import com.taskmanager.domain.entity.Task;
 import com.taskmanager.domain.enums.TaskStatus;
 import com.taskmanager.domain.repository.TaskRepository;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
@@ -35,5 +36,15 @@ public class TaskRepositoryAdapter implements TaskRepository {
     @Override
     public void excluirPorId(Long id) {
         jpaRepository.deleteById(id);
+    }
+
+    @Override
+    public long contarExistentes(Collection<Long> ids) {
+        return jpaRepository.countByIdIn(ids);
+    }
+
+    @Override
+    public void excluirPorIds(Collection<Long> ids) {
+        jpaRepository.deleteAllByIdInBatch(ids);
     }
 }

@@ -2,12 +2,12 @@ package com.taskmanager.domain.repository;
 
 import com.taskmanager.domain.entity.Task;
 import com.taskmanager.domain.enums.TaskStatus;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * A porta de persistência do domínio: as quatro operações que os casos de uso do CRUD precisam, e
- * nenhuma a mais. Quem a implementa vive em {@code infrastructure} — o domínio não conhece o
+ * A porta de persistência do domínio: as operações que os casos de uso precisam, e nenhuma a mais. Quem a implementa vive em {@code infrastructure} — o domínio não conhece o
  * Spring Data.
  */
 public interface TaskRepository {
@@ -25,4 +25,8 @@ public interface TaskRepository {
 
     /** Remove a linha; verificar se ela existia é papel da camada de aplicação. */
     void excluirPorId(Long id);
+
+    long contarExistentes(Collection<Long> ids);
+
+    void excluirPorIds(Collection<Long> ids);
 }

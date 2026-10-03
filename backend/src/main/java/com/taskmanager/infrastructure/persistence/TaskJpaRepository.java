@@ -2,6 +2,7 @@ package com.taskmanager.infrastructure.persistence;
 
 import com.taskmanager.domain.entity.Task;
 import com.taskmanager.domain.enums.TaskStatus;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +19,6 @@ public interface TaskJpaRepository extends JpaRepository<Task, Long> {
              order by t.createdAt desc
             """)
     List<Task> buscar(@Param("titulo") String titulo, @Param("status") TaskStatus status);
+
+    long countByIdIn(Collection<Long> ids);
 }

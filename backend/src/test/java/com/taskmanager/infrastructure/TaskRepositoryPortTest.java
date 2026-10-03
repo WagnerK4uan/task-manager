@@ -88,8 +88,25 @@ class TaskRepositoryPortTest extends PostgresIntegrationTest {
         assertThat(repositorio.buscarPorId(999L)).isEmpty();
     }
 
-    private void gravar(String titulo, TaskStatus status) {
-        repositorio.gravar(new Task(titulo, null, status, TaskPriority.MEDIA, null));
+    @Test
+    @DisplayName("@spec:AC-061 a porta conta os ids existentes e exclui o lote, sem encostar no resto")
+    void portaContaEExcluiOLote() {
+        Long primeira = gravar("Primeira do lote", TaskStatus.CONCLUIDA);
+        Long segunda = gravar("Segunda do lote", TaskStatus.CONCLUIDA);
+        Long mantida = gravar("Fora do lote", TaskStatus.PENDENTE);
+
+        assertThat(repositorio.contarExistentes(List.of(primeira, segunda, 999L))).isEqualTo(2);
+
+        repositorio.excluirPorIds(List.of(primeira, segunda));
+
+        assertThat(repositorio.buscarPorId(primeira)).isEmpty();
+        assertThat(repositorio.buscarPorId(segunda)).isEmpty();
+        assertThat(repositorio.buscarPorId(mantida)).isPresent();
+        assertThat(contarLinhas()).isEqualTo(1);
+    }
+
+    private Long gravar(String titulo, TaskStatus status) {
+        return repositorio.gravar(new Task(titulo, null, status, TaskPriority.MEDIA, null)).getId();
     }
 
     private int contarLinhas() {
